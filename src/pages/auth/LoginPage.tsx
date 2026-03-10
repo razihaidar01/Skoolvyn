@@ -16,7 +16,8 @@ const emailSchema = z.object({
 export default function LoginPage() {
   const navigate = useNavigate();
   const { signInWithEmail } = useAuth();
-  const [mode, setMode] = useState<'email' | 'otp'>('email');
+  // OTP mode disabled until Twilio is configured
+  // const [mode, setMode] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
