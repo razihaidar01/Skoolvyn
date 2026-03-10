@@ -6,7 +6,7 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Mail, Lock, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock } from 'lucide-react';
 
 const emailSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address'),
@@ -16,7 +16,8 @@ const emailSchema = z.object({
 export default function LoginPage() {
   const navigate = useNavigate();
   const { signInWithEmail } = useAuth();
-  const [mode, setMode] = useState<'email' | 'otp'>('email');
+  // OTP mode disabled until Twilio is configured
+  // const [mode, setMode] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -45,34 +46,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to your EduSphere account">
-      {/* Mode toggle */}
-      <div className="flex bg-secondary rounded-lg p-1 mb-6">
-        <button
-          type="button"
-          onClick={() => setMode('email')}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
-            mode === 'email'
-              ? 'bg-card text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Email & Password
-        </button>
-        <button
-          type="button"
-          onClick={() => { setMode('otp'); setError(''); }}
-          className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all ${
-            mode === 'otp'
-              ? 'bg-card text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Login with OTP
-        </button>
-      </div>
-
-      {mode === 'email' ? (
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+      <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
             <div className="relative">
@@ -121,23 +95,6 @@ export default function LoginPage() {
             Sign in
           </Button>
         </form>
-      ) : (
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Enter your registered phone number to receive an OTP.
-          </p>
-          <Button
-            variant="outline"
-            className="w-full"
-            size="lg"
-            onClick={() => navigate('/otp-login')}
-          >
-            <Phone className="mr-2 w-4 h-4" />
-            Continue with Phone Number
-          </Button>
-        </div>
-      )}
-
       <p className="text-center text-sm text-muted-foreground mt-8">
         Having trouble logging in?{' '}
         <a href="mailto:support@edusphere.in" className="text-primary hover:underline">
