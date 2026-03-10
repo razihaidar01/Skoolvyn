@@ -6,7 +6,7 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Mail, Lock, Phone } from 'lucide-react';
+import { Loader2, Mail, Lock } from 'lucide-react';
 
 const emailSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address'),
