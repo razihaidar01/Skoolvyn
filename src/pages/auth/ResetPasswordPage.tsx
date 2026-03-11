@@ -23,10 +23,17 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     // Check for recovery token in URL hash
     const hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
-      setIsRecovery(true);
-    }
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(hash.replace('#', ''));
+  
+  const isRecoveryHash = hash.includes('type=recovery');
+  const isRecoveryQuery = params.get('type') === 'recovery';
+  const isRecoveryHashParam = hashParams.get('type') === 'recovery';
+  
+  if (isRecoveryHash || isRecoveryQuery || isRecoveryHashParam) {
+    setIsRecovery(true);
+  }
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
