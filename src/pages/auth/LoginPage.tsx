@@ -97,7 +97,7 @@ export default function LoginPage() {
         </form>
       <p className="text-center text-sm text-muted-foreground mt-8">
         Having trouble logging in?{' '}
-        <a href="mailto:support@edusphere.in" className="text-primary hover:underline">
+        <a href="mailto:support@skoolvyn.com" className="text-primary hover:underline">
           Contact support
         </a>
       </p>
