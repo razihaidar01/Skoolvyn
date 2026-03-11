@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { z } from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const emailSchema = z.string().trim().email('Please enter a valid email address');
 
 export default function ForgotPasswordPage() {
-  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,14 +27,22 @@ export default function ForgotPasswordPage() {
     }
 
     setLoading(true);
-    const result = await resetPassword(email);
-    setLoading(false);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('send-reset-email', {
+        body: { email },
+      });
 
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setSent(true);
+      if (fnError) {
+        setError(fnError.message || 'Failed to send reset email');
+      } else if (data?.error) {
+        setError(data.error);
+      } else {
+        setSent(true);
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
     }
+    setLoading(false);
   };
 
   return (
