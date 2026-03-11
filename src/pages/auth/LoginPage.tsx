@@ -45,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Sign in to your EduSphere account">
+    <AuthLayout title="Welcome back" subtitle="Sign in to your Skoolvyn account">
       <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
