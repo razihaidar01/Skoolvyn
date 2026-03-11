@@ -159,12 +159,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    if (error) return { error: error.message };
-    return { error: null };
-  };
+  const redirectTo = window.location.origin.includes('localhost')
+    ? 'http://localhost:8080/reset-password'
+    : 'https://skoolvyn.vercel.app/reset-password';
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  if (error) return { error: error.message };
+  return { error: null };
+};
 
   const updatePassword = async (password: string) => {
     const { error } = await supabase.auth.updateUser({ password });
