@@ -30,7 +30,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 async function fetchUserRoleAndProfile(userId: string) {
-  const { data: profile, error: profileError } = await supabase
+  // Use type assertion to bypass generated types that may not include profiles/user_roles/roles
+  const { data: profile, error: profileError } = await (supabase as any)
     .from('profiles')
     .select('*')
     .eq('id', userId)
@@ -44,7 +45,7 @@ async function fetchUserRoleAndProfile(userId: string) {
     return { profile, role: null, institutionId: null, error: 'Account disabled. Please contact your administrator.' };
   }
 
-  const { data: userRole } = await supabase
+  const { data: userRole } = await (supabase as any)
     .from('user_roles')
     .select('role_id, institution_id')
     .eq('user_id', userId)
@@ -55,7 +56,7 @@ async function fetchUserRoleAndProfile(userId: string) {
   let institutionId: string | null = userRole?.institution_id || profile.institution_id;
 
   if (userRole?.role_id) {
-    const { data: roleData } = await supabase
+    const { data: roleData } = await (supabase as any)
       .from('roles')
       .select('name')
       .eq('id', userRole.role_id)
@@ -63,7 +64,6 @@ async function fetchUserRoleAndProfile(userId: string) {
     roleName = roleData?.name || null;
   }
 
-  // Update user_metadata with role and institution_id
   if (roleName || institutionId) {
     await supabase.auth.updateUser({
       data: { role: roleName, institution_id: institutionId },
@@ -88,7 +88,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Defer profile fetch to avoid deadlock
           setTimeout(async () => {
             const result = await fetchUserRoleAndProfile(session.user.id);
             setProfile(result.profile);
@@ -159,16 +158,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-  const redirectTo = window.location.origin.includes('localhost')
-    ? 'http://localhost:8080/reset-password'
-    : 'https://skoolvyn.vercel.app/reset-password';
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo,
-  });
-  if (error) return { error: error.message };
-  return { error: null };
-};
+    const { data, error: fnError } = await supabase.functions.invoke('send-reset-email', {
+      body: { email },
+    });
+    if (fnError) return { error: fnError.message };
+    if (data?.error) return { error: data.error };
+    return { error: null };
+  };
 
   const updatePassword = async (password: string) => {
     const { error } = await supabase.auth.updateUser({ password });

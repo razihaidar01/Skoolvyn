@@ -76,7 +76,7 @@ export default function SuperAdminDashboard() {
         (() => {
           const now = new Date();
           const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-          return supabase.from('subscriptions').select('amount').eq('status', 'active').gte('created_at', startOfMonth);
+          return (supabase as any).from('subscriptions').select('amount').eq('status', 'active').gte('created_at', startOfMonth);
         })(),
       ]);
 
