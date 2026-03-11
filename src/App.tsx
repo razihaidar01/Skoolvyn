@@ -10,6 +10,7 @@ import OtpLoginPage from "./pages/auth/OtpLoginPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFound from "./pages/NotFound";
 
@@ -31,8 +32,14 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-            {/* Protected dashboard routes - all roles land on the same component for now */}
-            <Route path="/super-admin/dashboard" element={<ProtectedRoute allowedRoles={['super_admin']}><DashboardPage /></ProtectedRoute>} />
+            {/* Super Admin Dashboard */}
+            <Route path="/super-admin/dashboard" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+            <Route path="/super-admin/institutions" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+            <Route path="/super-admin/subscriptions" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+            <Route path="/super-admin/announcements" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+            <Route path="/super-admin/settings" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
+
+            {/* Other protected routes */}
             <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><DashboardPage /></ProtectedRoute>} />
             <Route path="/admin/fees" element={<ProtectedRoute allowedRoles={['accountant', 'institution_admin']}><DashboardPage /></ProtectedRoute>} />
             <Route path="/admin/library" element={<ProtectedRoute allowedRoles={['librarian', 'institution_admin']}><DashboardPage /></ProtectedRoute>} />

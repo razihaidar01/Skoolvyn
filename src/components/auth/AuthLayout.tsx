@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { GraduationCap } from 'lucide-react';
 
 export function AuthLayout({ children, title, subtitle }: { children: ReactNode; title: string; subtitle?: string }) {
   return (
@@ -14,12 +13,12 @@ export function AuthLayout({ children, title, subtitle }: { children: ReactNode;
         <div className="relative z-10 text-primary-foreground text-center px-12 max-w-lg">
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="w-14 h-14 rounded-2xl bg-primary-foreground/20 flex items-center justify-center">
-              <GraduationCap className="w-8 h-8" />
+              <span className="text-2xl font-bold">SK</span>
             </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4">EduSphere</h1>
+          <h1 className="text-4xl font-bold mb-4">Skoolvyn</h1>
           <p className="text-lg text-primary-foreground/80 leading-relaxed">
-            The complete school & college management platform. Simplify administration, empower educators, and engage students.
+            Digital System for Modern Schools. Simplify administration, empower educators, and engage students.
           </p>
         </div>
       </div>
@@ -30,9 +29,9 @@ export function AuthLayout({ children, title, subtitle }: { children: ReactNode;
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-10">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <GraduationCap className="w-6 h-6 text-primary-foreground" />
+              <span className="text-lg font-bold text-primary-foreground">SK</span>
             </div>
-            <span className="text-2xl font-bold text-foreground">EduSphere</span>
+            <span className="text-2xl font-bold text-foreground">Skoolvyn</span>
           </div>
 
           <div className="mb-8">

@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, profile, role, signOut } = useAuth();
@@ -18,9 +18,9 @@ export default function DashboardPage() {
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary-foreground" />
+              <span className="text-xs font-bold text-primary-foreground">SK</span>
             </div>
-            <span className="font-bold text-foreground">EduSphere</span>
+            <span className="font-bold text-foreground">Skoolvyn</span>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
