@@ -11,7 +11,33 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { userId, fullName, email, phone, institutionId, roleName } = await req.json();
+    // Safe JSON parsing
+    let body;
+    try {
+      const text = await req.text();
+      if (!text || text.trim() === '') {
+        return new Response(
+          JSON.stringify({ error: "Empty request body" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      body = JSON.parse(text);
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { userId, fullName, email, phone, institutionId, roleName } = body;
+
+    // Validate required fields
+    if (!userId || !fullName || !email || !institutionId || !roleName) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -25,10 +51,10 @@ Deno.serve(async (req) => {
       .from("profiles")
       .upsert({
         id: userId,
-        first_name: nameParts[0],
+        first_name: nameParts[0] || "",
         last_name: nameParts.slice(1).join(" ") || null,
         email,
-        phone,
+        phone: phone || null,
         institution_id: institutionId,
         approval_status: "pending",
         is_active: false,
@@ -36,12 +62,13 @@ Deno.serve(async (req) => {
 
     if (profileError) {
       console.error("Profile insert error:", profileError);
-      return new Response(JSON.stringify({ error: profileError.message }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: profileError.message }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // 2. Get role id
+    // 2. Get role id and insert user_role
     const { data: roleData } = await supabaseAdmin
       .from("roles")
       .select("id")
@@ -49,32 +76,46 @@ Deno.serve(async (req) => {
       .single();
 
     if (roleData) {
-      await supabaseAdmin.from("user_roles").insert({
-        user_id: userId,
-        role_id: roleData.id,
-        institution_id: institutionId,
-      });
+      const { error: roleError } = await supabaseAdmin
+        .from("user_roles")
+        .insert({
+          user_id: userId,
+          role_id: roleData.id,
+          institution_id: institutionId,
+        });
+      if (roleError) console.error("Role insert error:", roleError);
     }
 
-    // 3. Log
-    await supabaseAdmin.from("approval_logs").insert({
-      action: "staff_registered",
-      target_type: "staff",
-      target_user_id: userId,
-      institution_id: institutionId,
-    });
+    // 3. Log (use valid enum action)
+    try {
+      await supabaseAdmin.from("approval_logs").insert({
+        action: "approved",
+        target_type: "staff",
+        target_user_id: userId,
+        institution_id: institutionId,
+        reason: `New staff registration as ${roleName} - pending approval`,
+      });
+    } catch (logErr) {
+      console.error("Log error:", logErr);
+    }
 
     // 4. Notify institution admin (best effort)
     try {
-      const { data: admins } = await supabaseAdmin
-        .from("users")
-        .select("id")
+      const { data: adminRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
         .eq("institution_id", institutionId)
-        .eq("role", "institution_admin");
+        .eq("role_id", (
+          await supabaseAdmin
+            .from("roles")
+            .select("id")
+            .eq("name", "institution_admin")
+            .single()
+        ).data?.id);
 
-      if (admins?.length) {
-        const notifications = admins.map((a: any) => ({
-          user_id: a.id,
+      if (adminRoles?.length) {
+        const notifications = adminRoles.map((a: any) => ({
+          recipient_id: a.user_id,
           title: "New Staff Registration",
           body: `${fullName} has registered as ${roleName.replace(/_/g, ' ')} and is pending approval.`,
           type: "approval",
@@ -82,15 +123,20 @@ Deno.serve(async (req) => {
         }));
         await supabaseAdmin.from("notifications").insert(notifications);
       }
-    } catch { /* best effort */ }
+    } catch (notifErr) {
+      console.error("Notification error (non-fatal):", notifErr);
+    }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+
   } catch (err) {
     console.error("Unexpected error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: err.message || "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
