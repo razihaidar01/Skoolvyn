@@ -60,6 +60,7 @@ export default function SuperAdminDashboard() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingInstitutions, setLoadingInstitutions] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
   const [formLoading, setFormLoading] = useState(false);
 
