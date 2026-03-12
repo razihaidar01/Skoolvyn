@@ -267,6 +267,61 @@ export type Database = {
           },
         ]
       }
+      approval_logs: {
+        Row: {
+          action: string
+          action_by: string | null
+          created_at: string | null
+          id: string
+          institution_id: string | null
+          reason: string | null
+          target_type: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          action_by?: string | null
+          created_at?: string | null
+          id?: string
+          institution_id?: string | null
+          reason?: string | null
+          target_type: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          action_by?: string | null
+          created_at?: string | null
+          id?: string
+          institution_id?: string | null
+          reason?: string | null
+          target_type?: string
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_logs_action_by_fkey"
+            columns: ["action_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_logs_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_logs_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
@@ -1146,8 +1201,12 @@ export type Database = {
           academic_year_start: string | null
           address: string | null
           affiliation_no: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           board: string | null
           city: string | null
+          contact_person: string | null
           country: string | null
           created_at: string | null
           currency: string | null
@@ -1160,6 +1219,8 @@ export type Database = {
           phone: string | null
           pincode: string | null
           plan: string | null
+          registered_by: string | null
+          rejection_reason: string | null
           state: string | null
           subscription_ends_at: string | null
           timezone: string | null
@@ -1173,8 +1234,12 @@ export type Database = {
           academic_year_start?: string | null
           address?: string | null
           affiliation_no?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           board?: string | null
           city?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string | null
           currency?: string | null
@@ -1187,6 +1252,8 @@ export type Database = {
           phone?: string | null
           pincode?: string | null
           plan?: string | null
+          registered_by?: string | null
+          rejection_reason?: string | null
           state?: string | null
           subscription_ends_at?: string | null
           timezone?: string | null
@@ -1200,8 +1267,12 @@ export type Database = {
           academic_year_start?: string | null
           address?: string | null
           affiliation_no?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           board?: string | null
           city?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string | null
           currency?: string | null
@@ -1214,6 +1285,8 @@ export type Database = {
           phone?: string | null
           pincode?: string | null
           plan?: string | null
+          registered_by?: string | null
+          rejection_reason?: string | null
           state?: string | null
           subscription_ends_at?: string | null
           timezone?: string | null
@@ -1886,6 +1959,71 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          avatar_url: string | null
+          created_at: string | null
+          device_os: string | null
+          email: string | null
+          expo_push_token: string | null
+          first_name: string | null
+          id: string
+          institution_id: string | null
+          is_active: boolean | null
+          last_name: string | null
+          phone: string | null
+          rejection_reason: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          device_os?: string | null
+          email?: string | null
+          expo_push_token?: string | null
+          first_name?: string | null
+          id: string
+          institution_id?: string | null
+          is_active?: boolean | null
+          last_name?: string | null
+          phone?: string | null
+          rejection_reason?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          device_os?: string | null
+          email?: string | null
+          expo_push_token?: string | null
+          first_name?: string | null
+          id?: string
+          institution_id?: string | null
+          is_active?: boolean | null
+          last_name?: string | null
+          phone?: string | null
+          rejection_reason?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           code: string | null
@@ -1936,6 +2074,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      roles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       staff: {
         Row: {
@@ -2837,6 +2996,52 @@ export type Database = {
             columns: ["route_id"]
             isOneToOne: false
             referencedRelation: "transport_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          id: string
+          institution_id: string | null
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          id?: string
+          institution_id?: string | null
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          id?: string
+          institution_id?: string | null
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
