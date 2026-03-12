@@ -35,6 +35,8 @@ const staffSchema = z.object({
 });
 
 const STAFF_ROLES = [
+  'hod',
+  'hr_manager',
   'principal', 'faculty', 'accountant', 'librarian',
   'hostel_warden', 'transport_manager',
 ];

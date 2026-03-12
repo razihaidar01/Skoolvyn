@@ -98,10 +98,12 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
         }
       } else {
         // Institution admin: only their institution's staff
+        const institutionId = user?.user_metadata?.institution_id;
         const { data: staffProfiles } = await (supabase as any)
           .from('profiles')
           .select('id, first_name, last_name, email, phone, created_at, institution_id')
           .eq('approval_status', 'pending')
+          .eq('institution_id', institutionId)
           .order('created_at', { ascending: false });
 
         if (staffProfiles?.length) {

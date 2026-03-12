@@ -34,11 +34,11 @@ export default function PendingApprovalPage() {
             .eq('registered_by', user.id)
             .single();
           if (inst?.approval_status === 'approved') {
-            window.location.reload();
+            navigate('/admin/dashboard');
             return;
           }
         } else {
-          window.location.reload();
+          navigate('/admin/dashboard');
           return;
         }
       }

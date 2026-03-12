@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
 
       if (adminRoles?.length) {
         const notifications = adminRoles.map((a: any) => ({
-          recipient_id: a.user_id,
+          user_id: a.user_id,
           title: "New Staff Registration",
           body: `${fullName} has registered as ${roleName.replace(/_/g, ' ')} and is pending approval.`,
           type: "approval",
