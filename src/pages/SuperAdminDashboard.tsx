@@ -14,8 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import {
   LayoutDashboard, Building2, CreditCard, Bell, Settings, LogOut, Plus, Menu, X,
-  Users, IndianRupee, Eye, Pencil, Ban
+  Users, IndianRupee, Eye, Pencil, Ban, ShieldCheck
 } from 'lucide-react';
+import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { format } from 'date-fns';
 
 interface Institution {
