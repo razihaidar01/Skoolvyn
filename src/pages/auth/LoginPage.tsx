@@ -95,12 +95,16 @@ export default function LoginPage() {
             Sign in
           </Button>
         </form>
-      <p className="text-center text-sm text-muted-foreground mt-8">
-        Having trouble logging in?{' '}
-        <a href="mailto:support@skoolvyn.com" className="text-primary hover:underline">
-          Contact support
-        </a>
-      </p>
+      <div className="mt-6 space-y-2">
+        <p className="text-center text-sm text-muted-foreground">
+          New institution?{' '}
+          <Link to="/register" className="text-primary hover:underline font-medium">Register your institution →</Link>
+        </p>
+        <p className="text-center text-sm text-muted-foreground">
+          Having trouble logging in?{' '}
+          <a href="mailto:support@skoolvyn.com" className="text-primary hover:underline">Contact support</a>
+        </p>
+      </div>
     </AuthLayout>
   );
 }

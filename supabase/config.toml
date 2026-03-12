@@ -2,3 +2,12 @@ project_id = "yifeqanwapyqcgsnehoo"
 
 [functions.send-reset-email]
 verify_jwt = false
+
+[functions.register-institution]
+verify_jwt = false
+
+[functions.register-staff]
+verify_jwt = false
+
+[functions.send-approval-email]
+verify_jwt = false

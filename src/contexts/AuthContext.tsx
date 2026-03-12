@@ -10,6 +10,8 @@ interface Profile {
   last_name: string | null;
   phone: string | null;
   is_active: boolean;
+  approval_status?: string | null;
+  rejection_reason?: string | null;
 }
 
 interface AuthContextType {
@@ -29,8 +31,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function getApprovalRedirect(role: string | null, profile: any, institutionApprovalStatus?: string | null): string | null {
+  if (role === 'super_admin') return null; // always allowed
+
+  // For institution_admin, check institution approval
+  if (role === 'institution_admin' && institutionApprovalStatus) {
+    if (institutionApprovalStatus === 'pending') return '/pending-approval';
+    if (institutionApprovalStatus === 'rejected') return '/account-rejected';
+    if (institutionApprovalStatus === 'suspended') return '/account-suspended';
+  }
+
+  // For all other roles, check profile approval
+  const profileStatus = profile?.approval_status;
+  if (profileStatus === 'pending') return '/pending-approval';
+  if (profileStatus === 'rejected') return '/account-rejected';
+  if (profileStatus === 'suspended') return '/account-suspended';
+
+  // Also check is_active
+  if (profile && !profile.is_active) return '/account-suspended';
+
+  return null;
+}
+
 async function fetchUserRoleAndProfile(userId: string) {
-  // Use type assertion to bypass generated types that may not include profiles/user_roles/roles
   const { data: profile, error: profileError } = await (supabase as any)
     .from('profiles')
     .select('*')
@@ -38,11 +61,7 @@ async function fetchUserRoleAndProfile(userId: string) {
     .single();
 
   if (profileError || !profile) {
-    return { profile: null, role: null, institutionId: null, error: 'Profile not found' };
-  }
-
-  if (!profile.is_active) {
-    return { profile, role: null, institutionId: null, error: 'Account disabled. Please contact your administrator.' };
+    return { profile: null, role: null, institutionId: null, institutionApprovalStatus: null, error: 'Profile not found' };
   }
 
   const { data: userRole } = await (supabase as any)
@@ -64,13 +83,24 @@ async function fetchUserRoleAndProfile(userId: string) {
     roleName = roleData?.name || null;
   }
 
+  // Check institution approval status for institution_admin
+  let institutionApprovalStatus: string | null = null;
+  if (roleName === 'institution_admin') {
+    const { data: inst } = await (supabase as any)
+      .from('institutions')
+      .select('approval_status')
+      .eq('registered_by', userId)
+      .single();
+    institutionApprovalStatus = inst?.approval_status || null;
+  }
+
   if (roleName || institutionId) {
     await supabase.auth.updateUser({
       data: { role: roleName, institution_id: institutionId },
     });
   }
 
-  return { profile, role: roleName, institutionId, error: null };
+  return { profile, role: roleName, institutionId, institutionApprovalStatus, error: null };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -116,16 +146,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: error.message, redirectPath: null };
 
     const result = await fetchUserRoleAndProfile(data.user.id);
-    if (result.error) {
-      if (result.error === 'Account disabled. Please contact your administrator.') {
-        await supabase.auth.signOut();
-      }
+    if (result.error && result.error === 'Profile not found') {
       return { error: result.error, redirectPath: null };
     }
 
     setProfile(result.profile);
     setRole(result.role);
     setInstitutionId(result.institutionId);
+
+    // Check approval status
+    const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
+    if (approvalRedirect) {
+      return { error: null, redirectPath: approvalRedirect };
+    }
+
+    // Check if account disabled (legacy check)
+    if (result.profile && !result.profile.is_active && result.role !== 'super_admin') {
+      await supabase.auth.signOut();
+      return { error: 'Account disabled. Please contact your administrator.', redirectPath: null };
+    }
 
     return { error: null, redirectPath: result.role ? getRedirectPath(result.role) : '/dashboard' };
   };
@@ -139,20 +178,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyOtp = async (phone: string, token: string) => {
     const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: 'sms' });
     if (error) return { error: error.message, redirectPath: null };
-
     if (!data.user) return { error: 'Verification failed', redirectPath: null };
 
     const result = await fetchUserRoleAndProfile(data.user.id);
-    if (result.error) {
-      if (result.error === 'Account disabled. Please contact your administrator.') {
-        await supabase.auth.signOut();
-      }
+    if (result.error && result.error === 'Profile not found') {
       return { error: result.error, redirectPath: null };
     }
 
     setProfile(result.profile);
     setRole(result.role);
     setInstitutionId(result.institutionId);
+
+    const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
+    if (approvalRedirect) {
+      return { error: null, redirectPath: approvalRedirect };
+    }
 
     return { error: null, redirectPath: result.role ? getRedirectPath(result.role) : '/dashboard' };
   };

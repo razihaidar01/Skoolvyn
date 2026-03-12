@@ -14,8 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import {
   LayoutDashboard, Building2, CreditCard, Bell, Settings, LogOut, Plus, Menu, X,
-  Users, IndianRupee, Eye, Pencil, Ban
+  Users, IndianRupee, Eye, Pencil, Ban, ShieldCheck
 } from 'lucide-react';
+import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { format } from 'date-fns';
 
 interface Institution {
@@ -41,6 +42,7 @@ interface Stats {
 
 const sidebarItems = [
   { title: 'Dashboard', icon: LayoutDashboard, path: '/super-admin/dashboard' },
+  { title: 'Approvals', icon: ShieldCheck, path: '/super-admin/approvals' },
   { title: 'Institutions', icon: Building2, path: '/super-admin/institutions' },
   { title: 'Subscriptions', icon: CreditCard, path: '/super-admin/subscriptions' },
   { title: 'Announcements', icon: Bell, path: '/super-admin/announcements' },
@@ -59,6 +61,7 @@ export default function SuperAdminDashboard() {
   const [loadingInstitutions, setLoadingInstitutions] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
   const [formLoading, setFormLoading] = useState(false);
 
   // Form state
@@ -207,6 +210,9 @@ export default function SuperAdminDashboard() {
               >
                 <item.icon className="w-5 h-5" />
                 {item.title}
+                {item.title === 'Approvals' && pendingApprovalCount > 0 && (
+                  <span className="ml-auto bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">{pendingApprovalCount}</span>
+                )}
               </button>
             );
           })}
@@ -245,108 +251,117 @@ export default function SuperAdminDashboard() {
 
         {/* Content */}
         <main className="flex-1 p-4 lg:p-6 space-y-6">
-          {/* Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {statCards.map((card) => (
-              <Card key={card.label} className="shadow-sm">
-                <CardContent className="p-5">
-                  {loadingStats ? (
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-8 w-16" />
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">{card.label}</p>
-                        <p className="text-2xl font-bold text-foreground mt-1">{card.value ?? 0}</p>
-                      </div>
-                      <div className={`w-10 h-10 rounded-lg bg-muted flex items-center justify-center ${card.color}`}>
-                        <card.icon className="w-5 h-5" />
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Institutions Table */}
-          <div className="bg-card rounded-lg border shadow-sm">
-            <div className="flex items-center justify-between p-4 lg:p-5 border-b">
-              <h2 className="text-lg font-semibold text-foreground">Institutions</h2>
-              <Button size="sm" onClick={() => setSheetOpen(true)}>
-                <Plus className="w-4 h-4 mr-1" />
-                Add Institution
-              </Button>
+          {location.pathname === '/super-admin/approvals' ? (
+            <div>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Pending Approvals</h2>
+              <ApprovalManagement mode="super_admin" onPendingCountChange={setPendingApprovalCount} />
             </div>
-
-            {loadingInstitutions ? (
-              <div className="p-5 space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
+          ) : (
+            <>
+              {/* Stat Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {statCards.map((card) => (
+                  <Card key={card.label} className="shadow-sm">
+                    <CardContent className="p-5">
+                      {loadingStats ? (
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-8 w-16" />
+                        </div>
+                      ) : (
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="text-sm text-muted-foreground">{card.label}</p>
+                            <p className="text-2xl font-bold text-foreground mt-1">{card.value ?? 0}</p>
+                          </div>
+                          <div className={`w-10 h-10 rounded-lg bg-muted flex items-center justify-center ${card.color}`}>
+                            <card.icon className="w-5 h-5" />
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            ) : institutions.length === 0 ? (
-              <div className="p-12 text-center">
-                <Building2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-                <h3 className="font-semibold text-foreground">No institutions yet</h3>
-                <p className="text-sm text-muted-foreground mt-1">Get started by adding your first institution.</p>
-                <Button className="mt-4" size="sm" onClick={() => setSheetOpen(true)}>
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add Institution
-                </Button>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Students</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {institutions.map((inst) => (
-                      <TableRow key={inst.id}>
-                        <TableCell className="font-medium">{inst.name}</TableCell>
-                        <TableCell className="capitalize">{inst.type}</TableCell>
-                        <TableCell className="capitalize">{inst.plan}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={inst.is_active ? 'default' : 'destructive'}
-                            className={inst.is_active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-0' : 'bg-red-100 text-red-700 hover:bg-red-100 border-0'}
-                          >
-                            {inst.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{inst.student_count}</TableCell>
-                        <TableCell>{format(new Date(inst.created_at), 'dd MMM yyyy')}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title="View">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit">
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Suspend">
-                              <Ban className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
+
+              {/* Institutions Table */}
+              <div className="bg-card rounded-lg border shadow-sm">
+                <div className="flex items-center justify-between p-4 lg:p-5 border-b">
+                  <h2 className="text-lg font-semibold text-foreground">Institutions</h2>
+                  <Button size="sm" onClick={() => setSheetOpen(true)}>
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Institution
+                  </Button>
+                </div>
+
+                {loadingInstitutions ? (
+                  <div className="p-5 space-y-3">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton key={i} className="h-12 w-full" />
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                ) : institutions.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <Building2 className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
+                    <h3 className="font-semibold text-foreground">No institutions yet</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Get started by adding your first institution.</p>
+                    <Button className="mt-4" size="sm" onClick={() => setSheetOpen(true)}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Institution
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Plan</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Students</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {institutions.map((inst) => (
+                          <TableRow key={inst.id}>
+                            <TableCell className="font-medium">{inst.name}</TableCell>
+                            <TableCell className="capitalize">{inst.type}</TableCell>
+                            <TableCell className="capitalize">{inst.plan}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={inst.is_active ? 'default' : 'destructive'}
+                                className={inst.is_active ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-0' : 'bg-red-100 text-red-700 hover:bg-red-100 border-0'}
+                              >
+                                {inst.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{inst.student_count}</TableCell>
+                            <TableCell>{format(new Date(inst.created_at), 'dd MMM yyyy')}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" title="View">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" title="Edit">
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Suspend">
+                                  <Ban className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </main>
       </div>
 
