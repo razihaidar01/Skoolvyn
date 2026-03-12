@@ -210,6 +210,9 @@ export default function SuperAdminDashboard() {
               >
                 <item.icon className="w-5 h-5" />
                 {item.title}
+                {item.title === 'Approvals' && pendingApprovalCount > 0 && (
+                  <span className="ml-auto bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-5 min-w-[20px] flex items-center justify-center px-1.5">{pendingApprovalCount}</span>
+                )}
               </button>
             );
           })}
