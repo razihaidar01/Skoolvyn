@@ -41,6 +41,7 @@ interface Stats {
 
 const sidebarItems = [
   { title: 'Dashboard', icon: LayoutDashboard, path: '/super-admin/dashboard' },
+  { title: 'Approvals', icon: ShieldCheck, path: '/super-admin/approvals' },
   { title: 'Institutions', icon: Building2, path: '/super-admin/institutions' },
   { title: 'Subscriptions', icon: CreditCard, path: '/super-admin/subscriptions' },
   { title: 'Announcements', icon: Bell, path: '/super-admin/announcements' },
