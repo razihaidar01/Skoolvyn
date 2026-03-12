@@ -1212,6 +1212,7 @@ export type Database = {
           currency: string | null
           email: string | null
           id: string
+          institution_code: string | null
           is_active: boolean | null
           logo_url: string | null
           medium: string | null
@@ -1245,6 +1246,7 @@ export type Database = {
           currency?: string | null
           email?: string | null
           id?: string
+          institution_code?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           medium?: string | null
@@ -1278,6 +1280,7 @@ export type Database = {
           currency?: string | null
           email?: string | null
           id?: string
+          institution_code?: string | null
           is_active?: boolean | null
           logo_url?: string | null
           medium?: string | null
