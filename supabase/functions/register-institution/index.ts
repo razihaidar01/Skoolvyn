@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
 
       if (superAdminRoles?.length) {
         const notifications = superAdminRoles.map((sa: any) => ({
-          recipient_id: sa.user_id,
+          user_id: sa.user_id,
           institution_id: inst.id,
           title: "New Institution Registration",
           body: `${institutionName} has registered and is pending approval.`,
