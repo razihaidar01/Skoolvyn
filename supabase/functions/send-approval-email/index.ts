@@ -91,7 +91,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    let body;
+    try {
+      const text = await req.text();
+      if (!text || text.trim() === '') {
+        return new Response(JSON.stringify({ error: 'Empty request body' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      body = JSON.parse(text);
+    } catch (e) {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const { type, recipient_email } = body;
 
     if (!type || !recipient_email) {
