@@ -12,6 +12,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import InstitutionAdminDashboard from "./pages/InstitutionAdminDashboard";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import AccountRejectedPage from "./pages/AccountRejectedPage";
 import AccountSuspendedPage from "./pages/AccountSuspendedPage";
