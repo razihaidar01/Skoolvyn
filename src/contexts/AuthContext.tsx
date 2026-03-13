@@ -61,7 +61,11 @@ async function fetchUserRoleAndProfile(userId: string) {
     .single();
 
   if (profileError || !profile) {
-    return { profile: null, role: null, institutionId: null, institutionApprovalStatus: null, error: null };
+    // Fallback: check user metadata for role
+    const { data: { user } } = await supabase.auth.getUser();
+    const metadataRole = user?.user_metadata?.role as string | null;
+    const metadataInstitutionId = user?.user_metadata?.institution_id as string | null;
+    return { profile: null, role: metadataRole || null, institutionId: metadataInstitutionId || null, institutionApprovalStatus: null, error: null };
   }
 
   const { data: userRole } = await (supabase as any)
@@ -151,9 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(result.role);
     setInstitutionId(result.institutionId);
 
-    // If no profile found, redirect to dashboard gracefully
+    // If no profile found, use role from metadata fallback
     if (!result.profile) {
-      return { error: null, redirectPath: '/dashboard' };
+      const path = result.role ? getRedirectPath(result.role) : '/dashboard';
+      return { error: null, redirectPath: path };
     }
 
     // Check approval status
@@ -189,7 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setInstitutionId(result.institutionId);
 
     if (!result.profile) {
-      return { error: null, redirectPath: '/dashboard' };
+      const path = result.role ? getRedirectPath(result.role) : '/dashboard';
+      return { error: null, redirectPath: path };
     }
 
     const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
