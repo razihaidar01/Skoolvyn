@@ -194,7 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setInstitutionId(result.institutionId);
 
     if (!result.profile) {
-      return { error: null, redirectPath: '/dashboard' };
+      const path = result.role ? getRedirectPath(result.role) : '/dashboard';
+      return { error: null, redirectPath: path };
     }
 
     const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
