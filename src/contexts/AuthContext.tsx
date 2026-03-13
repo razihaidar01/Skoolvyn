@@ -146,13 +146,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: error.message, redirectPath: null };
 
     const result = await fetchUserRoleAndProfile(data.user.id);
-    if (result.error && result.error === 'Profile not found') {
-      return { error: result.error, redirectPath: null };
-    }
 
     setProfile(result.profile);
     setRole(result.role);
     setInstitutionId(result.institutionId);
+
+    // If no profile found, redirect to dashboard gracefully
+    if (!result.profile) {
+      return { error: null, redirectPath: '/dashboard' };
+    }
 
     // Check approval status
     const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
@@ -161,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Check if account disabled (legacy check)
-    if (result.profile && !result.profile.is_active && result.role !== 'super_admin') {
+    if (!result.profile.is_active && result.role !== 'super_admin') {
       await supabase.auth.signOut();
       return { error: 'Account disabled. Please contact your administrator.', redirectPath: null };
     }
