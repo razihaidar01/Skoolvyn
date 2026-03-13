@@ -61,7 +61,7 @@ async function fetchUserRoleAndProfile(userId: string) {
     .single();
 
   if (profileError || !profile) {
-    return { profile: null, role: null, institutionId: null, institutionApprovalStatus: null, error: 'Profile not found' };
+    return { profile: null, role: null, institutionId: null, institutionApprovalStatus: null, error: null };
   }
 
   const { data: userRole } = await (supabase as any)
