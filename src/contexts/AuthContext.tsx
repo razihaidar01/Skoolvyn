@@ -155,9 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRole(result.role);
     setInstitutionId(result.institutionId);
 
-    // If no profile found, redirect to dashboard gracefully
+    // If no profile found, use role from metadata fallback
     if (!result.profile) {
-      return { error: null, redirectPath: '/dashboard' };
+      const path = result.role ? getRedirectPath(result.role) : '/dashboard';
+      return { error: null, redirectPath: path };
     }
 
     // Check approval status
