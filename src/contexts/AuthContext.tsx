@@ -183,13 +183,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!data.user) return { error: 'Verification failed', redirectPath: null };
 
     const result = await fetchUserRoleAndProfile(data.user.id);
-    if (result.error && result.error === 'Profile not found') {
-      return { error: result.error, redirectPath: null };
-    }
 
     setProfile(result.profile);
     setRole(result.role);
     setInstitutionId(result.institutionId);
+
+    if (!result.profile) {
+      return { error: null, redirectPath: '/dashboard' };
+    }
 
     const approvalRedirect = getApprovalRedirect(result.role, result.profile, result.institutionApprovalStatus);
     if (approvalRedirect) {
