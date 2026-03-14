@@ -258,7 +258,11 @@ export default function InstitutionAdminDashboard() {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 space-y-6">
-          {isApprovals ? (
+          {isStudentRoute ? (
+            isStudentNew || isStudentEdit ? <StudentForm /> :
+            isStudentProfile ? <StudentProfile /> :
+            <StudentsList />
+          ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
               <ApprovalManagement mode="institution_admin" onPendingCountChange={setPendingApprovalCount} />
