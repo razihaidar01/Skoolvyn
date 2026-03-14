@@ -52,7 +52,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const comingSoonRoutes = [
-  '/admin/academic', '/admin/departments', '/admin/students', '/admin/staff',
+  '/admin/academic', '/admin/departments', '/admin/staff',
   '/admin/timetable', '/admin/attendance', '/admin/examinations', '/admin/fees',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
