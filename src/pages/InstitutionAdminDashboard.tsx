@@ -12,6 +12,9 @@ import {
   Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
+import { StudentsList } from '@/components/admin/students/StudentsList';
+import { StudentForm } from '@/components/admin/students/StudentForm';
+import { StudentProfile } from '@/components/admin/students/StudentProfile';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
