@@ -155,7 +155,12 @@ export default function InstitutionAdminDashboard() {
   const currentPath = location.pathname;
   const isApprovals = currentPath === '/admin/approvals';
   const isDashboard = currentPath === '/admin/dashboard';
-  const isComingSoon = comingSoonRoutes.includes(currentPath);
+  const isStudentsList = currentPath === '/admin/students';
+  const isStudentNew = currentPath === '/admin/students/new';
+  const isStudentEdit = currentPath.match(/^\/admin\/students\/[^/]+\/edit$/);
+  const isStudentProfile = currentPath.match(/^\/admin\/students\/[^/]+$/) && !isStudentNew;
+  const isStudentRoute = isStudentsList || isStudentNew || !!isStudentEdit || !!isStudentProfile;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
