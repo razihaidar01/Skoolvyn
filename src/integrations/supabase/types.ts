@@ -2368,6 +2368,57 @@ export type Database = {
           },
         ]
       }
+      student_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          institution_id: string
+          student_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          institution_id: string
+          student_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          institution_id?: string
+          student_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_documents_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_documents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_fees: {
         Row: {
           academic_year_id: string | null
