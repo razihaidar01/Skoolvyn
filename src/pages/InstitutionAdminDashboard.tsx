@@ -12,6 +12,9 @@ import {
   Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
+import { StudentsList } from '@/components/admin/students/StudentsList';
+import { StudentForm } from '@/components/admin/students/StudentForm';
+import { StudentProfile } from '@/components/admin/students/StudentProfile';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -49,7 +52,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const comingSoonRoutes = [
-  '/admin/academic', '/admin/departments', '/admin/students', '/admin/staff',
+  '/admin/academic', '/admin/departments', '/admin/staff',
   '/admin/timetable', '/admin/attendance', '/admin/examinations', '/admin/fees',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
@@ -152,7 +155,12 @@ export default function InstitutionAdminDashboard() {
   const currentPath = location.pathname;
   const isApprovals = currentPath === '/admin/approvals';
   const isDashboard = currentPath === '/admin/dashboard';
-  const isComingSoon = comingSoonRoutes.includes(currentPath);
+  const isStudentsList = currentPath === '/admin/students';
+  const isStudentNew = currentPath === '/admin/students/new';
+  const isStudentEdit = currentPath.match(/^\/admin\/students\/[^/]+\/edit$/);
+  const isStudentProfile = currentPath.match(/^\/admin\/students\/[^/]+$/) && !isStudentNew;
+  const isStudentRoute = isStudentsList || isStudentNew || !!isStudentEdit || !!isStudentProfile;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -250,7 +258,11 @@ export default function InstitutionAdminDashboard() {
         </header>
 
         <main className="flex-1 p-4 lg:p-6 space-y-6">
-          {isApprovals ? (
+          {isStudentRoute ? (
+            isStudentNew || isStudentEdit ? <StudentForm /> :
+            isStudentProfile ? <StudentProfile /> :
+            <StudentsList />
+          ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
               <ApprovalManagement mode="institution_admin" onPendingCountChange={setPendingApprovalCount} />
