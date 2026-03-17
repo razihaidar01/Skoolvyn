@@ -64,6 +64,9 @@ const App = () => (
             <Route path="/admin/staff/new" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff/:id" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff/:id/edit" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/attendance" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/attendance/report" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/attendance/:batchId" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/attendance" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />

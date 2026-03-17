@@ -18,6 +18,9 @@ import { StudentProfile } from '@/components/admin/students/StudentProfile';
 import { StaffList } from '@/components/admin/staff/StaffList';
 import { StaffForm } from '@/components/admin/staff/StaffForm';
 import { StaffProfile } from '@/components/admin/staff/StaffProfile';
+import { AttendanceOverview } from '@/components/admin/attendance/AttendanceOverview';
+import { AttendanceSheet } from '@/components/admin/attendance/AttendanceSheet';
+import { AttendanceReport } from '@/components/admin/attendance/AttendanceReport';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -56,7 +59,7 @@ const sidebarItems: SidebarItem[] = [
 
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
-  '/admin/timetable', '/admin/attendance', '/admin/examinations', '/admin/fees',
+  '/admin/timetable', '/admin/examinations', '/admin/fees',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
 ];
@@ -170,7 +173,12 @@ export default function InstitutionAdminDashboard() {
   const isStaffProfile = currentPath.match(/^\/admin\/staff\/[^/]+$/) && !isStaffNew;
   const isStaffRoute = isStaffList || isStaffNew || !!isStaffEdit || !!isStaffProfile;
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute;
+  const isAttendanceOverview = currentPath === '/admin/attendance';
+  const isAttendanceSheet = currentPath.match(/^\/admin\/attendance\/[^/]+$/);
+  const isAttendanceReport = currentPath === '/admin/attendance/report';
+  const isAttendanceRoute = isAttendanceOverview || !!isAttendanceSheet || !!isAttendanceReport;
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -276,6 +284,10 @@ export default function InstitutionAdminDashboard() {
             isStaffNew || isStaffEdit ? <StaffForm /> :
             isStaffProfile ? <StaffProfile /> :
             <StaffList />
+          ) : isAttendanceRoute ? (
+            isAttendanceReport ? <AttendanceReport /> :
+            isAttendanceSheet ? <AttendanceSheet /> :
+            <AttendanceOverview />
           ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
