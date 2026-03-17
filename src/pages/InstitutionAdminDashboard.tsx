@@ -15,6 +15,9 @@ import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { StudentsList } from '@/components/admin/students/StudentsList';
 import { StudentForm } from '@/components/admin/students/StudentForm';
 import { StudentProfile } from '@/components/admin/students/StudentProfile';
+import { StaffList } from '@/components/admin/staff/StaffList';
+import { StaffForm } from '@/components/admin/staff/StaffForm';
+import { StaffProfile } from '@/components/admin/staff/StaffProfile';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -52,7 +55,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const comingSoonRoutes = [
-  '/admin/academic', '/admin/departments', '/admin/staff',
+  '/admin/academic', '/admin/departments',
   '/admin/timetable', '/admin/attendance', '/admin/examinations', '/admin/fees',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
@@ -160,7 +163,14 @@ export default function InstitutionAdminDashboard() {
   const isStudentEdit = currentPath.match(/^\/admin\/students\/[^/]+\/edit$/);
   const isStudentProfile = currentPath.match(/^\/admin\/students\/[^/]+$/) && !isStudentNew;
   const isStudentRoute = isStudentsList || isStudentNew || !!isStudentEdit || !!isStudentProfile;
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute;
+
+  const isStaffList = currentPath === '/admin/staff';
+  const isStaffNew = currentPath === '/admin/staff/new';
+  const isStaffEdit = currentPath.match(/^\/admin\/staff\/[^/]+\/edit$/);
+  const isStaffProfile = currentPath.match(/^\/admin\/staff\/[^/]+$/) && !isStaffNew;
+  const isStaffRoute = isStaffList || isStaffNew || !!isStaffEdit || !!isStaffProfile;
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -262,6 +272,10 @@ export default function InstitutionAdminDashboard() {
             isStudentNew || isStudentEdit ? <StudentForm /> :
             isStudentProfile ? <StudentProfile /> :
             <StudentsList />
+          ) : isStaffRoute ? (
+            isStaffNew || isStaffEdit ? <StaffForm /> :
+            isStaffProfile ? <StaffProfile /> :
+            <StaffList />
           ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
