@@ -21,6 +21,9 @@ import { StaffProfile } from '@/components/admin/staff/StaffProfile';
 import { AttendanceOverview } from '@/components/admin/attendance/AttendanceOverview';
 import { AttendanceSheet } from '@/components/admin/attendance/AttendanceSheet';
 import { AttendanceReport } from '@/components/admin/attendance/AttendanceReport';
+import { ExamsOverview } from '@/components/admin/exams/ExamsOverview';
+import { MarksEntry } from '@/components/admin/exams/MarksEntry';
+import { ResultsReport } from '@/components/admin/exams/ResultsReport';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -59,7 +62,7 @@ const sidebarItems: SidebarItem[] = [
 
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
-  '/admin/timetable', '/admin/examinations', '/admin/fees',
+  '/admin/timetable', '/admin/fees',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
 ];
@@ -178,7 +181,12 @@ export default function InstitutionAdminDashboard() {
   const isAttendanceReport = currentPath === '/admin/attendance/report';
   const isAttendanceRoute = isAttendanceOverview || !!isAttendanceSheet || !!isAttendanceReport;
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute;
+  const isExamsOverview = currentPath === '/admin/examinations';
+  const isMarksEntry = currentPath.match(/^\/admin\/examinations\/[^/]+\/marks$/);
+  const isResultsReport = currentPath === '/admin/examinations/report';
+  const isExamsRoute = isExamsOverview || !!isMarksEntry || !!isResultsReport;
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -288,6 +296,10 @@ export default function InstitutionAdminDashboard() {
             isAttendanceReport ? <AttendanceReport /> :
             isAttendanceSheet ? <AttendanceSheet /> :
             <AttendanceOverview />
+          ) : isExamsRoute ? (
+            isResultsReport ? <ResultsReport /> :
+            isMarksEntry ? <MarksEntry /> :
+            <ExamsOverview />
           ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
