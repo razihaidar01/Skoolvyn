@@ -70,8 +70,8 @@ export function ExamsOverview() {
 
   const fetchMeta = async () => {
     const [bRes, sRes, etRes] = await Promise.all([
-      supabase.from('batches').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
-      supabase.from('subjects').select('id, name, code').eq('institution_id', institutionId!).eq('is_active', true),
+      (supabase as any).from('batches').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
+      (supabase as any).from('subjects').select('id, name, code').eq('institution_id', institutionId!).eq('is_active', true),
       (supabase as any).from('exam_types').select('id, name').eq('institution_id', institutionId!),
     ]);
     setBatches(bRes.data || []);
