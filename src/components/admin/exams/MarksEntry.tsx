@@ -1,301 +1,379 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronLeft, Save, Loader2, Users, CheckCircle } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
+import {
+  FileText, Plus, ClipboardList, ChevronRight,
+  Calendar, BookOpen, Loader2, Pencil, Trash2
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface StudentMark {
-  studentId: string;
-  full_name: string;
-  roll_no: string | null;
-  admission_no: string;
-  marksObtained: string;
-  isAbsent: boolean;
-  grade: string;
-  markId: string | null;
+interface Exam {
+  id: string;
+  batch_id: string;
+  subject_id: string;
+  exam_type_id: string | null;
+  exam_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  max_marks: number | null;
+  pass_marks: number | null;
+  room_no: string | null;
+  is_published: boolean | null;
+  batch_name?: string;
+  subject_name?: string;
+  exam_type_name?: string;
+  marks_count?: number;
 }
 
-const calcGrade = (obtained: number, max: number): string => {
-  const pct = (obtained / max) * 100;
-  if (pct >= 90) return 'A+';
-  if (pct >= 80) return 'A';
-  if (pct >= 70) return 'B+';
-  if (pct >= 60) return 'B';
-  if (pct >= 50) return 'C';
-  if (pct >= 40) return 'D';
-  return 'F';
-};
-
-export function MarksEntry() {
-  const { institutionId, user } = useAuth();
+export function ExamsOverview() {
+  const { institutionId } = useAuth();
   const navigate = useNavigate();
-  const { examId } = useParams();
   const { toast } = useToast();
 
-  const [exam, setExam] = useState<any>(null);
-  const [students, setStudents] = useState<StudentMark[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [examTypes, setExamTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showDialog, setShowDialog] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [filterBatch, setFilterBatch] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+
+  const [form, setForm] = useState({
+    batch_id: '', subject_id: '', exam_type_id: '',
+    exam_date: '', start_time: '', end_time: '',
+    max_marks: '100', pass_marks: '35', room_no: '',
+  });
 
   useEffect(() => {
-    if (examId && institutionId) fetchAll();
-  }, [examId, institutionId]);
+    if (institutionId) { fetchMeta(); fetchExams(); }
+  }, [institutionId]);
 
-  const fetchAll = async () => {
+  useEffect(() => {
+    if (institutionId) fetchExams();
+  }, [filterBatch, filterType]);
+
+  const fetchMeta = async () => {
+    const [bRes, sRes, etRes] = await Promise.all([
+      (supabase as any).from('batches').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
+      (supabase as any).from('subjects').select('id, name, code').eq('institution_id', institutionId!).eq('is_active', true),
+      (supabase as any).from('exam_types').select('id, name').eq('institution_id', institutionId!),
+    ]);
+    setBatches(bRes.data || []);
+    setSubjects(sRes.data || []);
+    setExamTypes(etRes.data || []);
+  };
+
+  const fetchExams = async () => {
     setLoading(true);
     try {
-      // Fetch exam details
-      const { data: examData } = await (supabase as any).from('exams')
-        .select('*, subjects(name), batches(name), exam_types(name)')
-        .eq('id', examId).single();
-      setExam(examData);
-
-      if (!examData) { setLoading(false); return; }
-
-      // Fetch students in this batch
-      const { data: studData } = await (supabase as any).from('students')
-        .select('id, full_name, roll_no, admission_no')
+      let q = (supabase as any).from('exams')
+        .select('*')
         .eq('institution_id', institutionId!)
-        .eq('batch_id', examData.batch_id)
-        .eq('status', 'active')
-        .order('roll_no');
+        .order('exam_date', { ascending: false });
+      if (filterBatch !== 'all') q = q.eq('batch_id', filterBatch);
+      if (filterType !== 'all') q = q.eq('exam_type_id', filterType);
+      const { data } = await q;
 
-      // Fetch existing marks
-      const { data: marksData } = await (supabase as any).from('marks')
-        .select('id, student_id, marks_obtained, is_absent, grade')
-        .eq('exam_id', examId);
+      const batchMap: Record<string, string> = {};
+      batches.forEach(b => { batchMap[b.id] = b.name; });
+      const subMap: Record<string, string> = {};
+      subjects.forEach(s => { subMap[s.id] = s.name; });
+      const etMap: Record<string, string> = {};
+      examTypes.forEach(e => { etMap[e.id] = e.name; });
 
-      const marksMap: Record<string, any> = {};
-      (marksData || []).forEach((m: any) => { marksMap[m.student_id] = m; });
+      // Get marks counts
+      const examIds = (data || []).map((e: any) => e.id);
+      let marksMap: Record<string, number> = {};
+      if (examIds.length > 0) {
+        const { data: marksData } = await (supabase as any).from('marks')
+          .select('exam_id').in('exam_id', examIds);
+        (marksData || []).forEach((m: any) => {
+          marksMap[m.exam_id] = (marksMap[m.exam_id] || 0) + 1;
+        });
+      }
 
-      const rows: StudentMark[] = (studData || []).map((s: any) => ({
-        studentId: s.id,
-        full_name: s.full_name,
-        roll_no: s.roll_no,
-        admission_no: s.admission_no,
-        marksObtained: marksMap[s.id]?.marks_obtained?.toString() || '',
-        isAbsent: marksMap[s.id]?.is_absent || false,
-        grade: marksMap[s.id]?.grade || '',
-        markId: marksMap[s.id]?.id || null,
-      }));
-
-      setStudents(rows);
+      setExams((data || []).map((e: any) => ({
+        ...e,
+        batch_name: batchMap[e.batch_id] || '—',
+        subject_name: subMap[e.subject_id] || '—',
+        exam_type_name: e.exam_type_id ? etMap[e.exam_type_id] : null,
+        marks_count: marksMap[e.id] || 0,
+      })));
     } catch (err) { console.error(err); }
     setLoading(false);
   };
 
-  const updateMarks = (studentId: string, value: string) => {
-    setStudents(prev => prev.map(s => {
-      if (s.studentId !== studentId) return s;
-      const num = parseFloat(value);
-      const max = exam?.max_marks || 100;
-      const grade = !isNaN(num) && num >= 0 ? calcGrade(Math.min(num, max), max) : '';
-      return { ...s, marksObtained: value, grade, isAbsent: false };
-    }));
+  const openAdd = () => {
+    setEditId(null);
+    setForm({ batch_id: '', subject_id: '', exam_type_id: '', exam_date: '', start_time: '', end_time: '', max_marks: '100', pass_marks: '35', room_no: '' });
+    setShowDialog(true);
   };
 
-  const toggleAbsent = (studentId: string) => {
-    setStudents(prev => prev.map(s =>
-      s.studentId === studentId
-        ? { ...s, isAbsent: !s.isAbsent, marksObtained: !s.isAbsent ? '' : s.marksObtained, grade: !s.isAbsent ? 'AB' : s.grade }
-        : s
-    ));
+  const openEdit = (exam: Exam) => {
+    setEditId(exam.id);
+    setForm({
+      batch_id: exam.batch_id,
+      subject_id: exam.subject_id,
+      exam_type_id: exam.exam_type_id || '',
+      exam_date: exam.exam_date || '',
+      start_time: exam.start_time || '',
+      end_time: exam.end_time || '',
+      max_marks: exam.max_marks?.toString() || '100',
+      pass_marks: exam.pass_marks?.toString() || '35',
+      room_no: exam.room_no || '',
+    });
+    setShowDialog(true);
   };
 
   const handleSave = async () => {
-    if (!examId || !institutionId) return;
+    if (!form.batch_id || !form.subject_id) {
+      toast({ title: 'Required', description: 'Batch and Subject are required', variant: 'destructive' }); return;
+    }
     setSaving(true);
     try {
-      const toInsert: any[] = [];
-      const toUpdate: any[] = [];
-
-      students.forEach(s => {
-        const marksVal = s.isAbsent ? null : (s.marksObtained !== '' ? parseFloat(s.marksObtained) : null);
-        const record = {
-          institution_id: institutionId,
-          exam_id: examId,
-          student_id: s.studentId,
-          marks_obtained: marksVal,
-          is_absent: s.isAbsent,
-          grade: s.isAbsent ? 'AB' : s.grade,
-          entered_by: user?.id,
-        };
-        if (s.markId) toUpdate.push({ ...record, id: s.markId });
-        else toInsert.push(record);
-      });
-
-      if (toInsert.length > 0) {
-        await (supabase as any).from('marks').insert(toInsert);
+      const payload = {
+        institution_id: institutionId,
+        batch_id: form.batch_id,
+        subject_id: form.subject_id,
+        exam_type_id: form.exam_type_id || null,
+        exam_date: form.exam_date || null,
+        start_time: form.start_time || null,
+        end_time: form.end_time || null,
+        max_marks: form.max_marks ? parseFloat(form.max_marks) : null,
+        pass_marks: form.pass_marks ? parseFloat(form.pass_marks) : null,
+        room_no: form.room_no || null,
+      };
+      if (editId) {
+        await (supabase as any).from('exams').update(payload).eq('id', editId);
+        toast({ title: 'Exam updated!' });
+      } else {
+        await (supabase as any).from('exams').insert(payload);
+        toast({ title: 'Exam created!' });
       }
-      if (toUpdate.length > 0) {
-        await Promise.all(toUpdate.map(r =>
-          (supabase as any).from('marks').update(r).eq('id', r.id)
-        ));
-      }
-
-      toast({ title: '✅ Marks saved!', description: `${students.length} students updated` });
-      fetchAll();
+      setShowDialog(false);
+      fetchExams();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
   };
 
-  const presentCount = students.filter(s => !s.isAbsent && s.marksObtained !== '').length;
-  const absentCount = students.filter(s => s.isAbsent).length;
-  const passCount = students.filter(s => {
-    const m = parseFloat(s.marksObtained);
-    return !s.isAbsent && !isNaN(m) && m >= (exam?.pass_marks || 35);
-  }).length;
-
-  const gradeColor = (grade: string) => {
-    if (['A+', 'A'].includes(grade)) return 'text-emerald-600';
-    if (['B+', 'B'].includes(grade)) return 'text-blue-600';
-    if (grade === 'C') return 'text-amber-600';
-    if (grade === 'D') return 'text-orange-600';
-    if (grade === 'F' || grade === 'AB') return 'text-red-500';
-    return 'text-muted-foreground';
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this exam? All marks will also be deleted.')) return;
+    await (supabase as any).from('marks').delete().eq('exam_id', id);
+    await (supabase as any).from('exams').delete().eq('id', id);
+    toast({ title: 'Exam deleted' });
+    fetchExams();
   };
 
-  if (loading) return (
-    <div className="space-y-4">
-      <Skeleton className="h-20 w-full" />
-      <Skeleton className="h-96 w-full" />
-    </div>
-  );
+  const handlePublish = async (id: string, current: boolean) => {
+    await (supabase as any).from('exams').update({ is_published: !current }).eq('id', id);
+    await (supabase as any).from('marks').update({ is_published: !current }).eq('exam_id', id);
+    toast({ title: !current ? 'Results published!' : 'Results unpublished' });
+    fetchExams();
+  };
 
-  if (!exam) return (
-    <div className="text-center py-16">
-      <p className="text-muted-foreground">Exam not found</p>
-      <Button className="mt-4" onClick={() => navigate('/admin/examinations')}>Back</Button>
-    </div>
-  );
+  const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/examinations')}>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold">
-            {exam.subjects?.name} — Marks Entry
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {exam.batches?.name}
-            {exam.exam_types?.name && ` · ${exam.exam_types.name}`}
-            {exam.exam_date && ` · ${new Date(exam.exam_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
-          </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Examinations</h2>
+          <p className="text-sm text-muted-foreground">Manage exams and enter marks</p>
         </div>
-        <div className="text-right text-sm hidden sm:block">
-          <p className="font-medium">Max: {exam.max_marks} | Pass: {exam.pass_marks}</p>
-          <p className="text-muted-foreground">{exam.room_no ? `Room: ${exam.room_no}` : ''}</p>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-4 gap-3">
-        {[
-          { label: 'Total', value: students.length, color: 'text-foreground' },
-          { label: 'Entered', value: presentCount, color: 'text-blue-600' },
-          { label: 'Absent', value: absentCount, color: 'text-red-500' },
-          { label: 'Pass', value: passCount, color: 'text-emerald-600' },
-        ].map(s => (
-          <Card key={s.label} className="shadow-sm">
-            <CardContent className="p-3 text-center">
-              <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Marks Table */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Users className="w-4 h-4" /> {students.length} Students
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {students.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <p>No students in this batch</p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {/* Header Row */}
-              <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-muted/50 text-xs font-medium text-muted-foreground">
-                <div className="col-span-1">#</div>
-                <div className="col-span-4">Student</div>
-                <div className="col-span-3">Marks / {exam.max_marks}</div>
-                <div className="col-span-2">Grade</div>
-                <div className="col-span-2">Absent</div>
-              </div>
-
-              {students.map((s, idx) => (
-                <div key={s.studentId}
-                  className={`grid grid-cols-12 gap-2 px-4 py-3 items-center ${s.isAbsent ? 'bg-red-50/50' : ''}`}>
-                  <div className="col-span-1 text-xs text-muted-foreground">{idx + 1}</div>
-                  <div className="col-span-4">
-                    <p className="text-sm font-medium">{s.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{s.roll_no || s.admission_no}</p>
-                  </div>
-                  <div className="col-span-3">
-                    <Input
-                      type="number"
-                      min="0"
-                      max={exam.max_marks}
-                      value={s.marksObtained}
-                      onChange={e => updateMarks(s.studentId, e.target.value)}
-                      disabled={s.isAbsent}
-                      className="h-8 text-sm"
-                      placeholder="—"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    {s.isAbsent ? (
-                      <Badge className="bg-red-100 text-red-700 border-0 text-xs">AB</Badge>
-                    ) : s.grade ? (
-                      <span className={`text-sm font-bold ${gradeColor(s.grade)}`}>{s.grade}</span>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">—</span>
-                    )}
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Checkbox
-                      checked={s.isAbsent}
-                      onCheckedChange={() => toggleAbsent(s.studentId)}
-                    />
-                    <span className="text-xs text-muted-foreground">Absent</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      {students.length > 0 && (
-        <div className="flex items-center justify-between sticky bottom-0 bg-background border-t pt-4 pb-2">
-          <p className="text-sm text-muted-foreground">
-            {presentCount} marks entered · {absentCount} absent · {passCount} passing
-          </p>
-          <Button onClick={handleSave} disabled={saving} size="lg">
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            Save Marks
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin/examinations/report')}>
+            <ClipboardList className="w-4 h-4 mr-1" /> Results Report
+          </Button>
+          <Button size="sm" onClick={openAdd}>
+            <Plus className="w-4 h-4 mr-1" /> Add Exam
           </Button>
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <Select value={filterBatch} onValueChange={setFilterBatch}>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Batches" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Batches</SelectItem>
+            {batches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Types" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {examTypes.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Exams List */}
+      {loading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+        </div>
+      ) : exams.length === 0 ? (
+        <Card className="shadow-sm">
+          <CardContent className="py-16 text-center">
+            <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+            <h3 className="font-semibold">No exams yet</h3>
+            <p className="text-sm text-muted-foreground mt-1">Create your first exam to get started!</p>
+            <Button className="mt-4" size="sm" onClick={openAdd}>
+              <Plus className="w-4 h-4 mr-1" /> Add Exam
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {exams.map(exam => (
+            <Card key={exam.id} className="shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-5 h-5 text-red-500" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-sm">{exam.subject_name}</h3>
+                        {exam.exam_type_name && (
+                          <Badge variant="secondary" className="text-xs">{exam.exam_type_name}</Badge>
+                        )}
+                        {exam.is_published ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs">Published</Badge>
+                        ) : (
+                          <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Draft</Badge>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-1.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <BookOpen className="w-3 h-3" /> {exam.batch_name}
+                        </span>
+                        {exam.exam_date && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(exam.exam_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                        {exam.start_time && <span>🕐 {exam.start_time} – {exam.end_time}</span>}
+                        <span>Max: {exam.max_marks} | Pass: {exam.pass_marks}</span>
+                        {exam.room_no && <span>Room: {exam.room_no}</span>}
+                      </div>
+                      <div className="mt-2">
+                        <span className="text-xs text-muted-foreground">
+                          {exam.marks_count} marks entered
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button size="sm" onClick={() => navigate(`/admin/examinations/${exam.id}/marks`)}>
+                      Enter Marks <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                    <Button variant="outline" size="sm"
+                      onClick={() => handlePublish(exam.id, exam.is_published || false)}>
+                      {exam.is_published ? 'Unpublish' : 'Publish'}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(exam)}>
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(exam.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
+
+      {/* Add/Edit Dialog */}
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editId ? 'Edit Exam' : 'Add New Exam'}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-2">
+            <div className="col-span-2 space-y-1.5">
+              <Label>Batch *</Label>
+              <Select value={form.batch_id} onValueChange={v => update('batch_id', v)}>
+                <SelectTrigger><SelectValue placeholder="Select batch" /></SelectTrigger>
+                <SelectContent>{batches.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label>Subject *</Label>
+              <Select value={form.subject_id} onValueChange={v => update('subject_id', v)}>
+                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+                <SelectContent>{subjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name}{s.code ? ` (${s.code})` : ''}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label>Exam Type</Label>
+              <Select value={form.exam_type_id} onValueChange={v => update('exam_type_id', v)}>
+                <SelectTrigger><SelectValue placeholder="Select type (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {examTypes.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Exam Date</Label>
+              <Input type="date" value={form.exam_date} onChange={e => update('exam_date', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Room No.</Label>
+              <Input value={form.room_no} onChange={e => update('room_no', e.target.value)} placeholder="e.g. Hall-A" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Start Time</Label>
+              <Input type="time" value={form.start_time} onChange={e => update('start_time', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>End Time</Label>
+              <Input type="time" value={form.end_time} onChange={e => update('end_time', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Max Marks *</Label>
+              <Input type="number" value={form.max_marks} onChange={e => update('max_marks', e.target.value)} placeholder="100" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Pass Marks *</Label>
+              <Input type="number" value={form.pass_marks} onChange={e => update('pass_marks', e.target.value)} placeholder="35" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {editId ? 'Save Changes' : 'Create Exam'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
