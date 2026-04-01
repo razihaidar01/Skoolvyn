@@ -24,6 +24,10 @@ import { AttendanceReport } from '@/components/admin/attendance/AttendanceReport
 import { ExamsOverview } from '@/components/admin/exams/ExamsOverview';
 import { MarksEntry } from '@/components/admin/exams/MarksEntry';
 import { ResultsReport } from '@/components/admin/exams/ResultsReport';
+import { FeesDashboard } from '@/components/admin/fees/FeesDashboard';
+import { CollectFee } from '@/components/admin/fees/CollectFee';
+import { FeeStructures } from '@/components/admin/fees/FeeStructures';
+import { FeeDefaulters } from '@/components/admin/fees/FeeDefaulters';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -62,7 +66,7 @@ const sidebarItems: SidebarItem[] = [
 
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
-  '/admin/timetable', '/admin/fees',
+  '/admin/timetable',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
 ];
@@ -186,7 +190,13 @@ export default function InstitutionAdminDashboard() {
   const isResultsReport = currentPath === '/admin/examinations/report';
   const isExamsRoute = isExamsOverview || !!isMarksEntry || !!isResultsReport;
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute;
+  const isFeesDashboard = currentPath === '/admin/fees';
+  const isCollectFee = currentPath === '/admin/fees/collect';
+  const isFeeStructures = currentPath === '/admin/fees/structures';
+  const isFeeDefaulters = currentPath === '/admin/fees/defaulters';
+  const isFeesRoute = isFeesDashboard || isCollectFee || isFeeStructures || isFeeDefaulters;
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -300,6 +310,11 @@ export default function InstitutionAdminDashboard() {
             isResultsReport ? <ResultsReport /> :
             isMarksEntry ? <MarksEntry /> :
             <ExamsOverview />
+          ) : isFeesRoute ? (
+            isCollectFee ? <CollectFee /> :
+            isFeeStructures ? <FeeStructures /> :
+            isFeeDefaulters ? <FeeDefaulters /> :
+            <FeesDashboard />
           ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
