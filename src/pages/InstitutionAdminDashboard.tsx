@@ -66,7 +66,7 @@ const sidebarItems: SidebarItem[] = [
 
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
-  '/admin/timetable', '/admin/fees',
+  '/admin/timetable',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
   '/admin/settings', '/admin/events',
 ];
