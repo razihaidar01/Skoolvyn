@@ -101,8 +101,8 @@ export function StudentForm() {
   const fetchOptions = async () => {
     if (!institutionId) return;
     const [batchRes, programRes] = await Promise.all([
-      supabase.from('batches').select('id, name, program_id').eq('institution_id', institutionId).eq('is_active', true),
-      supabase.from('programs').select('id, name').eq('institution_id', institutionId).eq('is_active', true),
+      (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId).eq('is_active', true),
+      (supabase as any).from('programs').select('id, name').eq('institution_id', institutionId).eq('is_active', true),
     ]);
     setBatches(batchRes.data || []);
     setPrograms(programRes.data || []);
@@ -229,9 +229,9 @@ export function StudentForm() {
 
     let result;
     if (isEdit && id) {
-      result = await supabase.from('students').update(payload).eq('id', id).eq('institution_id', institutionId).select().single();
+      result = await (supabase as any).from('students').update(payload).eq('id', id).eq('institution_id', institutionId).select().single();
     } else {
-      result = await supabase.from('students').insert(payload).select().single();
+      result = await (supabase as any).from('students').insert(payload).select().single();
     }
 
     setSaving(false);

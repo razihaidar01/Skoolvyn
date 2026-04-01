@@ -56,7 +56,7 @@ export function StaffProfile() {
     setPayroll(payRes.data || []);
 
     if (staffRes.data?.department_id) {
-      const { data: dept } = await supabase.from('departments').select('name').eq('id', staffRes.data.department_id).single();
+      const { data: dept } = await (supabase as any).from('departments').select('name').eq('id', staffRes.data.department_id).single();
       setDepartment((dept as any)?.name || '');
     }
     setLoading(false);

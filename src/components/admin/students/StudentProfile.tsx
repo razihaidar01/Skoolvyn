@@ -51,11 +51,11 @@ export function StudentProfile() {
     setLoading(true);
 
     const [studentRes, feeRes, paymentRes, attendanceRes, marksRes, docsRes] = await Promise.all([
-      supabase.from('students').select('*').eq('id', id).eq('institution_id', institutionId).single(),
-      supabase.from('student_fees').select('*').eq('student_id', id).eq('institution_id', institutionId),
-      supabase.from('fee_payments').select('*').eq('student_id', id).eq('institution_id', institutionId).order('payment_date', { ascending: false }),
-      supabase.from('student_attendance').select('*').eq('student_id', id).eq('institution_id', institutionId).order('date', { ascending: false }).limit(100),
-      supabase.from('marks').select('*, exams(exam_date, max_marks, pass_marks, subjects(name), exam_types(name))').eq('student_id', id).eq('institution_id', institutionId),
+      (supabase as any).from('students').select('*').eq('id', id).eq('institution_id', institutionId).single(),
+      (supabase as any).from('student_fees').select('*').eq('student_id', id).eq('institution_id', institutionId),
+      (supabase as any).from('fee_payments').select('*').eq('student_id', id).eq('institution_id', institutionId).order('payment_date', { ascending: false }),
+      (supabase as any).from('student_attendance').select('*').eq('student_id', id).eq('institution_id', institutionId).order('date', { ascending: false }).limit(100),
+      (supabase as any).from('marks').select('*, exams(exam_date, max_marks, pass_marks, subjects(name), exam_types(name))').eq('student_id', id).eq('institution_id', institutionId),
       (supabase as any).from('student_documents').select('*').eq('student_id', id).eq('institution_id', institutionId).order('created_at', { ascending: false }),
     ]);
 
@@ -68,10 +68,10 @@ export function StudentProfile() {
     setDocuments(docsRes.data || []);
 
     if (s?.batch_id) {
-      const batchRes = await supabase.from('batches').select('name, program_id').eq('id', s.batch_id).single();
+      const batchRes = await (supabase as any).from('batches').select('name, program_id').eq('id', s.batch_id).single();
       setBatch(batchRes.data);
       if (batchRes.data?.program_id) {
-        const progRes = await supabase.from('programs').select('name').eq('id', batchRes.data.program_id).single();
+        const progRes = await (supabase as any).from('programs').select('name').eq('id', batchRes.data.program_id).single();
         setProgram(progRes.data);
       }
     }
@@ -81,7 +81,7 @@ export function StudentProfile() {
 
   const handleDeactivate = async () => {
     if (!id || !institutionId) return;
-    await supabase.from('students').update({ status: 'inactive' }).eq('id', id).eq('institution_id', institutionId);
+    await (supabase as any).from('students').update({ status: 'inactive' }).eq('id', id).eq('institution_id', institutionId);
     toast({ title: 'Student Deactivated' });
     fetchAll();
   };

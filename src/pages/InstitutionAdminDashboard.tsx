@@ -104,17 +104,17 @@ export default function InstitutionAdminDashboard() {
         instRes, studRes, staffRes, attPresentRes, attTotalRes,
         feeRes, approvalRes, programRes, annRes, eventRes, defaulterRes
       ] = await Promise.all([
-        supabase.from('institutions').select('name').eq('id', institutionId).single(),
-        supabase.from('students').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
-        supabase.from('staff').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
-        supabase.from('student_attendance').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('date', today).eq('status', 'present'),
-        supabase.from('student_attendance').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('date', today),
-        supabase.from('fee_payments').select('amount').eq('institution_id', institutionId).gte('payment_date', startOfMonth),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('approval_status', 'pending'),
-        supabase.from('programs').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
-        supabase.from('announcements').select('id, title, body, created_at').eq('institution_id', institutionId).order('created_at', { ascending: false }).limit(10),
-        supabase.from('events').select('id, title, start_date, event_type').eq('institution_id', institutionId).gte('start_date', today).order('start_date', { ascending: true }).limit(5),
-        supabase.from('student_fees').select('id, student_id, net_amount, due_date, status').eq('institution_id', institutionId).neq('status', 'paid').lt('due_date', today).limit(5),
+        (supabase as any).from('institutions').select('name').eq('id', institutionId).single(),
+        (supabase as any).from('students').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
+        (supabase as any).from('staff').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
+        (supabase as any).from('student_attendance').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('date', today).eq('status', 'present'),
+        (supabase as any).from('student_attendance').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('date', today),
+        (supabase as any).from('fee_payments').select('amount').eq('institution_id', institutionId).gte('payment_date', startOfMonth),
+        (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId).eq('approval_status', 'pending'),
+        (supabase as any).from('programs').select('id', { count: 'exact', head: true }).eq('institution_id', institutionId),
+        (supabase as any).from('announcements').select('id, title, body, created_at').eq('institution_id', institutionId).order('created_at', { ascending: false }).limit(10),
+        (supabase as any).from('events').select('id, title, start_date, event_type').eq('institution_id', institutionId).gte('start_date', today).order('start_date', { ascending: true }).limit(5),
+        (supabase as any).from('student_fees').select('id, student_id, net_amount, due_date, status').eq('institution_id', institutionId).neq('status', 'paid').lt('due_date', today).limit(5),
       ]);
 
       setInstitutionName(instRes.data?.name || '');
