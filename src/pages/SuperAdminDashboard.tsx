@@ -146,7 +146,7 @@ export default function SuperAdminDashboard() {
       return;
     }
     setFormLoading(true);
-    const { error } = await supabase.from('institutions').insert([{
+    const { error } = await (supabase as any).from('institutions').insert([{
       name: form.name.trim(),
       type: form.type,
       email: form.email.trim(),
