@@ -38,12 +38,12 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-            {/* Approval status pages (need auth) */}
+            {/* Approval status pages */}
             <Route path="/pending-approval" element={<ProtectedRoute><PendingApprovalPage /></ProtectedRoute>} />
             <Route path="/account-rejected" element={<ProtectedRoute><AccountRejectedPage /></ProtectedRoute>} />
             <Route path="/account-suspended" element={<ProtectedRoute><AccountSuspendedPage /></ProtectedRoute>} />
 
-            {/* Super Admin Dashboard */}
+            {/* Super Admin */}
             <Route path="/super-admin/dashboard" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
             <Route path="/super-admin/approvals" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
             <Route path="/super-admin/institutions" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
@@ -51,39 +51,50 @@ const App = () => (
             <Route path="/super-admin/announcements" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
             <Route path="/super-admin/settings" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
 
-            {/* Other protected routes */}
-            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            {/* Institution Admin — Core */}
+            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'hr_manager', 'accountant', 'librarian', 'hostel_warden', 'transport_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/approvals" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/academic" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/departments" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Students */}
             <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/new" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/:id" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/:id/edit" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Staff */}
             <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff/new" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff/:id" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/staff/:id/edit" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hr_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Attendance */}
             <Route path="/admin/attendance" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/attendance/report" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/attendance/:batchId" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Examinations */}
             <Route path="/admin/examinations" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/examinations/report" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/examinations/:examId/marks" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/staff" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/attendance" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
-            <Route path="/admin/examinations" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Fees */}
             <Route path="/admin/fees" element={<ProtectedRoute allowedRoles={['institution_admin', 'accountant', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/fees/collect" element={<ProtectedRoute allowedRoles={['institution_admin', 'accountant', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/fees/structures" element={<ProtectedRoute allowedRoles={['institution_admin', 'accountant', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/fees/defaulters" element={<ProtectedRoute allowedRoles={['institution_admin', 'accountant', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Coming Soon Modules */}
+            <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/library" element={<ProtectedRoute allowedRoles={['librarian', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/hostel" element={<ProtectedRoute allowedRoles={['hostel_warden', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/transport" element={<ProtectedRoute allowedRoles={['transport_manager', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/announcements" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+
+            {/* Role Dashboards */}
             <Route path="/faculty/dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><DashboardPage /></ProtectedRoute>} />
             <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><DashboardPage /></ProtectedRoute>} />
             <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><DashboardPage /></ProtectedRoute>} />
