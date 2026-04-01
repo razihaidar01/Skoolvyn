@@ -190,7 +190,13 @@ export default function InstitutionAdminDashboard() {
   const isResultsReport = currentPath === '/admin/examinations/report';
   const isExamsRoute = isExamsOverview || !!isMarksEntry || !!isResultsReport;
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute;
+  const isFeesDashboard = currentPath === '/admin/fees';
+  const isCollectFee = currentPath === '/admin/fees/collect';
+  const isFeeStructures = currentPath === '/admin/fees/structures';
+  const isFeeDefaulters = currentPath === '/admin/fees/defaulters';
+  const isFeesRoute = isFeesDashboard || isCollectFee || isFeeStructures || isFeeDefaulters;
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
