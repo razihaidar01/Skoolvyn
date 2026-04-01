@@ -53,7 +53,7 @@ export function AttendanceReport() {
   }, [institutionId, selectedBatch, selectedMonth, selectedYear]);
 
   const fetchBatches = async () => {
-    const { data } = await supabase.from('batches').select('id, name')
+    const { data } = await (supabase as any).from('batches').select('id, name')
       .eq('institution_id', institutionId!).eq('is_active', true).order('name');
     setBatches(data || []);
   };

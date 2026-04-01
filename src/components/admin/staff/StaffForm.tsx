@@ -127,7 +127,7 @@ export function StaffForm() {
   }, [form.basic_salary]);
 
   const fetchDepartments = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('departments')
       .select('id, name')
       .eq('institution_id', institutionId!);

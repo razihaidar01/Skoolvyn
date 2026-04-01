@@ -53,7 +53,7 @@ export function AttendanceSheet() {
   }, [batchId, institutionId, selectedDate]);
 
   const fetchBatch = async () => {
-    const { data } = await supabase.from('batches').select('name').eq('id', batchId!).single();
+    const { data } = await (supabase as any).from('batches').select('name').eq('id', batchId!).single();
     setBatchName((data as any)?.name || 'Batch');
   };
 
