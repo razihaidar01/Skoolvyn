@@ -55,7 +55,7 @@ export function AttendanceOverview() {
       // For each batch get student count + attendance for selected date
       const summaries = await Promise.all(batchData.map(async (batch) => {
         const [studRes, attRes] = await Promise.all([
-          supabase.from('students').select('id', { count: 'exact', head: true })
+          (supabase as any).from('students').select('id', { count: 'exact', head: true })
             .eq('institution_id', institutionId!).eq('batch_id', batch.id).eq('status', 'active'),
           (supabase as any).from('student_attendance').select('status')
             .eq('institution_id', institutionId!).eq('batch_id', batch.id).eq('date', selectedDate),
