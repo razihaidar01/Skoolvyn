@@ -68,10 +68,10 @@ export function StudentProfile() {
     setDocuments(docsRes.data || []);
 
     if (s?.batch_id) {
-      const batchRes = await supabase.from('batches').select('name, program_id').eq('id', s.batch_id).single();
+      const batchRes = await (supabase as any).from('batches').select('name, program_id').eq('id', s.batch_id).single();
       setBatch(batchRes.data);
       if (batchRes.data?.program_id) {
-        const progRes = await supabase.from('programs').select('name').eq('id', batchRes.data.program_id).single();
+        const progRes = await (supabase as any).from('programs').select('name').eq('id', batchRes.data.program_id).single();
         setProgram(progRes.data);
       }
     }
