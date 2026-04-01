@@ -24,6 +24,10 @@ import { AttendanceReport } from '@/components/admin/attendance/AttendanceReport
 import { ExamsOverview } from '@/components/admin/exams/ExamsOverview';
 import { MarksEntry } from '@/components/admin/exams/MarksEntry';
 import { ResultsReport } from '@/components/admin/exams/ResultsReport';
+import { FeesDashboard } from '@/components/admin/fees/FeesDashboard';
+import { CollectFee } from '@/components/admin/fees/CollectFee';
+import { FeeStructures } from '@/components/admin/fees/FeeStructures';
+import { FeeDefaulters } from '@/components/admin/fees/FeeDefaulters';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
