@@ -73,9 +73,9 @@ export default function SuperAdminDashboard() {
     setLoadingStats(true);
     try {
       const [instRes, activeRes, studRes, subRes] = await Promise.all([
-        supabase.from('institutions').select('id', { count: 'exact', head: true }),
-        supabase.from('institutions').select('id', { count: 'exact', head: true }).eq('is_active', true),
-        supabase.from('students').select('id', { count: 'exact', head: true }),
+        (supabase as any).from('institutions').select('id', { count: 'exact', head: true }),
+        (supabase as any).from('institutions').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        (supabase as any).from('students').select('id', { count: 'exact', head: true }),
         (() => {
           const now = new Date();
           const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
