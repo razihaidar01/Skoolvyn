@@ -310,6 +310,11 @@ export default function InstitutionAdminDashboard() {
             isResultsReport ? <ResultsReport /> :
             isMarksEntry ? <MarksEntry /> :
             <ExamsOverview />
+          ) : isFeesRoute ? (
+            isCollectFee ? <CollectFee /> :
+            isFeeStructures ? <FeeStructures /> :
+            isFeeDefaulters ? <FeeDefaulters /> :
+            <FeesDashboard />
           ) : isApprovals ? (
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
