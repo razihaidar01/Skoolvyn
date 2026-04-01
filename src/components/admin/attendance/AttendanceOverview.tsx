@@ -43,7 +43,7 @@ export function AttendanceOverview() {
     setLoading(true);
     try {
       // Fetch all active batches
-      const { data: batchData } = await supabase
+      const { data: batchData } = await (supabase as any)
         .from('batches')
         .select('id, name')
         .eq('institution_id', institutionId!)

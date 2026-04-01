@@ -229,9 +229,9 @@ export function StudentForm() {
 
     let result;
     if (isEdit && id) {
-      result = await supabase.from('students').update(payload).eq('id', id).eq('institution_id', institutionId).select().single();
+      result = await (supabase as any).from('students').update(payload).eq('id', id).eq('institution_id', institutionId).select().single();
     } else {
-      result = await supabase.from('students').insert(payload).select().single();
+      result = await (supabase as any).from('students').insert(payload).select().single();
     }
 
     setSaving(false);

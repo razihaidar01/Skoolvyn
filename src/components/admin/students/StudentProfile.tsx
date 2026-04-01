@@ -81,7 +81,7 @@ export function StudentProfile() {
 
   const handleDeactivate = async () => {
     if (!id || !institutionId) return;
-    await supabase.from('students').update({ status: 'inactive' }).eq('id', id).eq('institution_id', institutionId);
+    await (supabase as any).from('students').update({ status: 'inactive' }).eq('id', id).eq('institution_id', institutionId);
     toast({ title: 'Student Deactivated' });
     fetchAll();
   };
