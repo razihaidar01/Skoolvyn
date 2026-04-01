@@ -101,8 +101,8 @@ export function StudentForm() {
   const fetchOptions = async () => {
     if (!institutionId) return;
     const [batchRes, programRes] = await Promise.all([
-      supabase.from('batches').select('id, name, program_id').eq('institution_id', institutionId).eq('is_active', true),
-      supabase.from('programs').select('id, name').eq('institution_id', institutionId).eq('is_active', true),
+      (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId).eq('is_active', true),
+      (supabase as any).from('programs').select('id, name').eq('institution_id', institutionId).eq('is_active', true),
     ]);
     setBatches(batchRes.data || []);
     setPrograms(programRes.data || []);
