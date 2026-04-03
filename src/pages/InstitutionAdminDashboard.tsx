@@ -28,6 +28,11 @@ import { FeesDashboard } from '@/components/admin/fees/FeesDashboard';
 import { CollectFee } from '@/components/admin/fees/CollectFee';
 import { FeeStructures } from '@/components/admin/fees/FeeStructures';
 import { FeeDefaulters } from '@/components/admin/fees/FeeDefaulters';
+import { LibraryModule } from '@/components/admin/library/LibraryModule';
+import { HostelModule } from '@/components/admin/hostel/HostelModule';
+import { TransportModule } from '@/components/admin/transport/TransportModule';
+import { AnnouncementsModule } from '@/components/admin/announcements/AnnouncementsModule';
+import { EventsModule } from '@/components/admin/events/EventsModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -67,8 +72,7 @@ const sidebarItems: SidebarItem[] = [
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
   '/admin/timetable',
-  '/admin/library', '/admin/hostel', '/admin/transport', '/admin/announcements',
-  '/admin/settings', '/admin/events',
+  '/admin/library', '/admin/hostel', '/admin/transport', '/admin/settings',
 ];
 
 function formatINR(amount: number): string {
@@ -196,7 +200,13 @@ export default function InstitutionAdminDashboard() {
   const isFeeDefaulters = currentPath === '/admin/fees/defaulters';
   const isFeesRoute = isFeesDashboard || isCollectFee || isFeeStructures || isFeeDefaulters;
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute;
+  const isLibrary = currentPath === '/admin/library';
+  const isHostel = currentPath === '/admin/hostel';
+  const isTransport = currentPath === '/admin/transport';
+  const isAnnouncements = currentPath === '/admin/announcements';
+  const isEvents = currentPath === '/admin/events';
+
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -320,6 +330,16 @@ export default function InstitutionAdminDashboard() {
               <h2 className="text-lg font-semibold text-foreground mb-4">Staff Approvals</h2>
               <ApprovalManagement mode="institution_admin" onPendingCountChange={setPendingApprovalCount} />
             </div>
+          ) : isLibrary ? (
+            <LibraryModule />
+          ) : isHostel ? (
+            <HostelModule />
+          ) : isTransport ? (
+            <TransportModule />
+          ) : isAnnouncements ? (
+            <AnnouncementsModule />
+          ) : isEvents ? (
+            <EventsModule />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">
