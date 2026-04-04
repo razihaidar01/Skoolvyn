@@ -47,6 +47,13 @@ export type Database = {
             foreignKeyName: "academic_years_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academic_years_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -132,6 +139,13 @@ export type Database = {
             foreignKeyName: "admissions_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admissions_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -198,6 +212,13 @@ export type Database = {
             foreignKeyName: "alumni_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alumni_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -255,6 +276,13 @@ export type Database = {
             foreignKeyName: "announcements_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -304,6 +332,13 @@ export type Database = {
             columns: ["action_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "approval_logs_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -365,6 +400,13 @@ export type Database = {
             columns: ["assignment_id"]
             isOneToOne: false
             referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_submissions_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -445,6 +487,13 @@ export type Database = {
             foreignKeyName: "assignments_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -495,6 +544,13 @@ export type Database = {
             columns: ["faculty_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batch_subjects_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -578,6 +634,13 @@ export type Database = {
             foreignKeyName: "batches_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "batches_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -627,6 +690,13 @@ export type Database = {
             columns: ["hod_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -699,6 +769,13 @@ export type Database = {
             foreignKeyName: "events_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -727,6 +804,13 @@ export type Database = {
           weightage?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "exam_types_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "exam_types_institution_id_fkey"
             columns: ["institution_id"]
@@ -811,6 +895,13 @@ export type Database = {
             foreignKeyName: "exams_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exams_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -849,6 +940,13 @@ export type Database = {
           name?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fee_categories_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fee_categories_institution_id_fkey"
             columns: ["institution_id"]
@@ -916,6 +1014,13 @@ export type Database = {
             columns: ["collected_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_payments_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -1010,6 +1115,13 @@ export type Database = {
             foreignKeyName: "fee_structures_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_structures_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1062,6 +1174,13 @@ export type Database = {
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_allocations_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -1142,6 +1261,13 @@ export type Database = {
             foreignKeyName: "hostel_rooms_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hostel_rooms_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1179,6 +1305,13 @@ export type Database = {
           warden_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "hostels_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "hostels_institution_id_fkey"
             columns: ["institution_id"]
@@ -1361,6 +1494,13 @@ export type Database = {
             foreignKeyName: "leave_requests_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1406,6 +1546,13 @@ export type Database = {
           name?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "leave_types_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leave_types_institution_id_fkey"
             columns: ["institution_id"]
@@ -1466,6 +1613,13 @@ export type Database = {
             foreignKeyName: "library_books_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_books_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1520,6 +1674,13 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "library_books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_issues_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -1607,6 +1768,13 @@ export type Database = {
             foreignKeyName: "marks_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marks_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1661,6 +1829,13 @@ export type Database = {
             foreignKeyName: "notifications_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1702,6 +1877,13 @@ export type Database = {
           student_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "parent_student_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "parent_student_institution_id_fkey"
             columns: ["institution_id"]
@@ -1794,6 +1976,13 @@ export type Database = {
             foreignKeyName: "payroll_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1843,6 +2032,13 @@ export type Database = {
             columns: ["drive_id"]
             isOneToOne: false
             referencedRelation: "placement_drives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "placement_applications_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -1900,6 +2096,13 @@ export type Database = {
             foreignKeyName: "placement_companies_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "placement_companies_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -1951,6 +2154,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "placement_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "placement_drives_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -2022,6 +2232,13 @@ export type Database = {
             foreignKeyName: "profiles_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2067,6 +2284,13 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programs_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -2217,6 +2441,13 @@ export type Database = {
             foreignKeyName: "staff_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2264,6 +2495,13 @@ export type Database = {
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "staff_attendance_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "staff_attendance_institution_id_fkey"
             columns: ["institution_id"]
@@ -2342,6 +2580,13 @@ export type Database = {
             foreignKeyName: "student_attendance_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_attendance_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2403,6 +2648,13 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "student_documents_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "student_documents_institution_id_fkey"
             columns: ["institution_id"]
@@ -2490,6 +2742,13 @@ export type Database = {
             foreignKeyName: "student_fees_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_fees_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2539,6 +2798,13 @@ export type Database = {
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_transport_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -2716,6 +2982,13 @@ export type Database = {
             foreignKeyName: "students_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2787,6 +3060,13 @@ export type Database = {
             foreignKeyName: "study_materials_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_materials_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2848,6 +3128,13 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subjects_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
             referencedColumns: ["id"]
           },
           {
@@ -2938,6 +3225,13 @@ export type Database = {
             foreignKeyName: "timetable_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timetable_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -2998,6 +3292,13 @@ export type Database = {
             foreignKeyName: "transport_routes_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_routes_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -3042,6 +3343,13 @@ export type Database = {
             foreignKeyName: "transport_stops_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_stops_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -3077,6 +3385,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_roles_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_roles_institution_id_fkey"
             columns: ["institution_id"]
@@ -3178,6 +3493,13 @@ export type Database = {
             foreignKeyName: "users_institution_id_fkey"
             columns: ["institution_id"]
             isOneToOne: false
+            referencedRelation: "institution_code_lookup"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "users_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
             referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
@@ -3185,7 +3507,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      institution_code_lookup: {
+        Row: {
+          id: string | null
+          institution_code: string | null
+          name: string | null
+        }
+        Insert: {
+          id?: string | null
+          institution_code?: string | null
+          name?: string | null
+        }
+        Update: {
+          id?: string | null
+          institution_code?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_my_institution_id: { Args: never; Returns: string }
