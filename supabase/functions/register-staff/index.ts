@@ -5,6 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Roles that can be self-assigned during registration
+const ALLOWED_REGISTRATION_ROLES = [
+  "faculty", "accountant", "librarian", "hostel_warden",
+  "transport_manager", "hr_manager", "lab_assistant",
+  "office_staff", "counselor",
+];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -22,7 +29,7 @@ Deno.serve(async (req) => {
         );
       }
       body = JSON.parse(text);
-    } catch (e) {
+    } catch (_e) {
       return new Response(
         JSON.stringify({ error: "Invalid JSON body" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -36,6 +43,45 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // SECURITY: Reject privileged roles — prevent self-escalation
+    if (!ALLOWED_REGISTRATION_ROLES.includes(roleName)) {
+      return new Response(
+        JSON.stringify({ error: `Role '${roleName}' cannot be self-assigned during registration` }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate JWT: ensure the caller is the user being registered
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authorization required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user: callerUser }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !callerUser) {
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Ensure the caller is registering themselves, not someone else
+    if (callerUser.id !== userId) {
+      return new Response(
+        JSON.stringify({ error: "You can only register your own account" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
