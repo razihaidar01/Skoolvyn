@@ -115,13 +115,11 @@ export default function RegisterPage() {
 
     setStaffLoading(true);
     try {
-      // 1. Verify institution code
-      const { data: inst } = await supabase
-        .from('institutions')
-        .select('id, name')
-        .eq('institution_code', staffForm.institutionCode.toUpperCase())
-        .single();
+      // 1. Verify institution code via secure RPC
+      const { data: instResults } = await (supabase as any)
+        .rpc('lookup_institution_by_code', { p_code: staffForm.institutionCode.toUpperCase() });
 
+      const inst = instResults?.[0];
       if (!inst) throw new Error('Invalid institution code. Please check with your admin.');
 
       // 2. Create auth user
