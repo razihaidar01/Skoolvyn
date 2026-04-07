@@ -66,7 +66,7 @@ export function ReportsAnalytics() {
       ] = await Promise.all([
         (supabase as any).from('students').select('id, batch_id, status').eq('institution_id', institutionId!),
         (supabase as any).from('staff').select('id, department_id, status').eq('institution_id', institutionId!),
-        (supabase as any).from('fee_payments').select('amount_paid, payment_date').eq('institution_id', institutionId!).gte('payment_date', yearStart).lte('payment_date', yearEnd),
+        (supabase as any).from('fee_payments').select('amount, payment_date').eq('institution_id', institutionId!).gte('payment_date', yearStart).lte('payment_date', yearEnd),
         (supabase as any).from('student_attendance').select('date, status, batch_id').eq('institution_id', institutionId!).gte('date', yearStart).lte('date', yearEnd),
         (supabase as any).from('library_books').select('id, total_copies, available_copies').eq('institution_id', institutionId!),
         (supabase as any).from('student_fees').select('net_amount, amount_paid, status').eq('institution_id', institutionId!).neq('status', 'paid'),
