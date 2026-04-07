@@ -33,7 +33,7 @@ import { HostelModule } from '@/components/admin/hostel/HostelModule';
 import { TransportModule } from '@/components/admin/transport/TransportModule';
 import { AnnouncementsModule } from '@/components/admin/announcements/AnnouncementsModule';
 import { EventsModule } from '@/components/admin/events/EventsModule';
-import { AcademicSetup } from '@/components/admin/academic/AcademicSetup';
+import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -71,7 +71,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 const comingSoonRoutes = [
-  '/admin/timetable',
+  '/admin/academic', '/admin/departments',
   '/admin/library', '/admin/hostel', '/admin/transport', '/admin/settings',
 ];
 
@@ -206,9 +206,9 @@ export default function InstitutionAdminDashboard() {
   const isAnnouncements = currentPath === '/admin/announcements';
   const isEvents = currentPath === '/admin/events';
 
-  const isAcademic = currentPath === '/admin/academic' || currentPath === '/admin/departments';
+  const isTimetable = currentPath === '/admin/timetable';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isAcademic;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -342,8 +342,8 @@ export default function InstitutionAdminDashboard() {
             <AnnouncementsModule />
           ) : isEvents ? (
             <EventsModule />
-          ) : isAcademic ? (
-            <AcademicSetup />
+          ) : isTimetable ? (
+            <TimetableModule />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">
