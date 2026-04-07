@@ -208,10 +208,11 @@ export default function InstitutionAdminDashboard() {
   const isTransport = currentPath === '/admin/transport';
   const isAnnouncements = currentPath === '/admin/announcements';
   const isEvents = currentPath === '/admin/events';
+  const isReports = currentPath === '/admin/reports';
 
   const isTimetable = currentPath === '/admin/timetable';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
