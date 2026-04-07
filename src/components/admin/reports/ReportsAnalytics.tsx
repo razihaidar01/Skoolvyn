@@ -107,7 +107,7 @@ export function ReportsAnalytics() {
       const monthlyMap: Record<number, number> = {};
       allPayments.forEach((p: any) => {
         const m = new Date(p.payment_date).getMonth();
-        monthlyMap[m] = (monthlyMap[m] || 0) + Number(p.amount_paid || 0);
+        monthlyMap[m] = (monthlyMap[m] || 0) + Number(p.amount || 0);
       });
       setMonthlyFees(MONTHS.map((m, i) => ({ month: m, amount: Math.round(monthlyMap[i] || 0) })));
 
