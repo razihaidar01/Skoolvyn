@@ -3190,6 +3190,7 @@ export type Database = {
     Functions: {
       get_my_institution_id: { Args: never; Returns: string }
       get_my_role: { Args: never; Returns: string }
+      has_role_any: { Args: { _roles: string[] }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       lookup_institution_by_code: {
         Args: { p_code: string }
