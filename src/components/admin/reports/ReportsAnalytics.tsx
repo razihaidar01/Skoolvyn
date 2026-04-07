@@ -157,7 +157,7 @@ export function ReportsAnalytics() {
         setFeeDefaulters(defaulterRes.data.map((d: any) => ({
           ...d,
           student: studMap[d.student_id],
-          pending: Math.max(0, (Number(d.net_amount) || 0) - (Number(d.amount_paid) || 0)),
+          pending: Math.max(0, (Number(d.net_amount) || 0) - (Number(d.paid_amount) || 0)),
           daysOverdue: Math.ceil((new Date().getTime() - new Date(d.due_date).getTime()) / (1000 * 60 * 60 * 24)),
         })));
       }
