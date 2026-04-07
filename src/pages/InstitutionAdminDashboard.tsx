@@ -68,6 +68,8 @@ const sidebarItems: SidebarItem[] = [
   { title: 'Hostel', icon: Home, path: '/admin/hostel' },
   { title: 'Transport', icon: Bus, path: '/admin/transport' },
   { title: 'Announcements', icon: Bell, path: '/admin/announcements' },
+  { title: 'Events', icon: CalendarDays, path: '/admin/events' },
+  { title: 'Reports', icon: BarChart3, path: '/admin/reports' },
   { title: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
