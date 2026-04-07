@@ -34,6 +34,7 @@ import { TransportModule } from '@/components/admin/transport/TransportModule';
 import { AnnouncementsModule } from '@/components/admin/announcements/AnnouncementsModule';
 import { EventsModule } from '@/components/admin/events/EventsModule';
 import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
+import { ReportsAnalytics } from '@/components/admin/reports/ReportsAnalytics';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
