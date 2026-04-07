@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   LayoutDashboard, ShieldCheck, GraduationCap, Building, Users, UserCheck,
   Calendar, ClipboardCheck, FileText, IndianRupee, BookOpen, Home, Bus,
-  Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon
+  Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon, BarChart3, CalendarDays
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { StudentsList } from '@/components/admin/students/StudentsList';
