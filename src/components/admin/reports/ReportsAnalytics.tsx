@@ -92,7 +92,7 @@ export function ReportsAnalytics() {
       const totalRevenue = allPayments.reduce((s: number, p: any) => s + (Number(p.amount) || 0), 0);
       const presentAtt = allAtt.filter((a: any) => a.status === 'present').length;
       const avgAtt = allAtt.length > 0 ? Math.round((presentAtt / allAtt.length) * 100) : 0;
-      const totalPending = pendingFees.reduce((s: number, f: any) => s + Math.max(0, (Number(f.net_amount) || 0) - (Number(f.amount_paid) || 0)), 0);
+      const totalPending = pendingFees.reduce((s: number, f: any) => s + Math.max(0, (Number(f.net_amount) || 0) - (Number(f.paid_amount) || 0)), 0);
 
       setStats({
         totalStudents: allStudents.filter((s: any) => s.status === 'active').length,
