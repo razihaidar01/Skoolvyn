@@ -73,7 +73,7 @@ export function ReportsAnalytics() {
         (supabase as any).from('programs').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
         (supabase as any).from('departments').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
         (supabase as any).from('marks').select('student_id, marks_obtained, exam_id, is_absent').eq('institution_id', institutionId!),
-        (supabase as any).from('student_fees').select('student_id, net_amount, amount_paid, due_date').eq('institution_id', institutionId!).neq('status', 'paid').lt('due_date', today).limit(10),
+        (supabase as any).from('student_fees').select('student_id, net_amount, paid_amount, due_date').eq('institution_id', institutionId!).neq('status', 'paid').lt('due_date', today).limit(10),
         (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId!),
       ]);
 
