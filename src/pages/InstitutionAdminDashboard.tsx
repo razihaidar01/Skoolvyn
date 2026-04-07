@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   LayoutDashboard, ShieldCheck, GraduationCap, Building, Users, UserCheck,
   Calendar, ClipboardCheck, FileText, IndianRupee, BookOpen, Home, Bus,
-  Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon
+  Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon, BarChart3, CalendarDays
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { StudentsList } from '@/components/admin/students/StudentsList';
@@ -34,6 +34,7 @@ import { TransportModule } from '@/components/admin/transport/TransportModule';
 import { AnnouncementsModule } from '@/components/admin/announcements/AnnouncementsModule';
 import { EventsModule } from '@/components/admin/events/EventsModule';
 import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
+import { ReportsAnalytics } from '@/components/admin/reports/ReportsAnalytics';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -67,6 +68,8 @@ const sidebarItems: SidebarItem[] = [
   { title: 'Hostel', icon: Home, path: '/admin/hostel' },
   { title: 'Transport', icon: Bus, path: '/admin/transport' },
   { title: 'Announcements', icon: Bell, path: '/admin/announcements' },
+  { title: 'Events', icon: CalendarDays, path: '/admin/events' },
+  { title: 'Reports', icon: BarChart3, path: '/admin/reports' },
   { title: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
@@ -205,10 +208,11 @@ export default function InstitutionAdminDashboard() {
   const isTransport = currentPath === '/admin/transport';
   const isAnnouncements = currentPath === '/admin/announcements';
   const isEvents = currentPath === '/admin/events';
+  const isReports = currentPath === '/admin/reports';
 
   const isTimetable = currentPath === '/admin/timetable';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -344,6 +348,8 @@ export default function InstitutionAdminDashboard() {
             <EventsModule />
           ) : isTimetable ? (
             <TimetableModule />
+          ) : isReports ? (
+            <ReportsAnalytics />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">

@@ -66,14 +66,14 @@ export function ReportsAnalytics() {
       ] = await Promise.all([
         (supabase as any).from('students').select('id, batch_id, status').eq('institution_id', institutionId!),
         (supabase as any).from('staff').select('id, department_id, status').eq('institution_id', institutionId!),
-        (supabase as any).from('fee_payments').select('amount_paid, payment_date').eq('institution_id', institutionId!).gte('payment_date', yearStart).lte('payment_date', yearEnd),
+        (supabase as any).from('fee_payments').select('amount, payment_date').eq('institution_id', institutionId!).gte('payment_date', yearStart).lte('payment_date', yearEnd),
         (supabase as any).from('student_attendance').select('date, status, batch_id').eq('institution_id', institutionId!).gte('date', yearStart).lte('date', yearEnd),
         (supabase as any).from('library_books').select('id, total_copies, available_copies').eq('institution_id', institutionId!),
-        (supabase as any).from('student_fees').select('net_amount, amount_paid, status').eq('institution_id', institutionId!).neq('status', 'paid'),
+        (supabase as any).from('student_fees').select('net_amount, paid_amount, status').eq('institution_id', institutionId!).neq('status', 'paid'),
         (supabase as any).from('programs').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
         (supabase as any).from('departments').select('id, name').eq('institution_id', institutionId!).eq('is_active', true),
         (supabase as any).from('marks').select('student_id, marks_obtained, exam_id, is_absent').eq('institution_id', institutionId!),
-        (supabase as any).from('student_fees').select('student_id, net_amount, amount_paid, due_date').eq('institution_id', institutionId!).neq('status', 'paid').lt('due_date', today).limit(10),
+        (supabase as any).from('student_fees').select('student_id, net_amount, paid_amount, due_date').eq('institution_id', institutionId!).neq('status', 'paid').lt('due_date', today).limit(10),
         (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId!),
       ]);
 
@@ -89,10 +89,10 @@ export function ReportsAnalytics() {
       const allBatches = batchRes.data || [];
 
       // Overview stats
-      const totalRevenue = allPayments.reduce((s: number, p: any) => s + (Number(p.amount_paid) || 0), 0);
+      const totalRevenue = allPayments.reduce((s: number, p: any) => s + (Number(p.amount) || 0), 0);
       const presentAtt = allAtt.filter((a: any) => a.status === 'present').length;
       const avgAtt = allAtt.length > 0 ? Math.round((presentAtt / allAtt.length) * 100) : 0;
-      const totalPending = pendingFees.reduce((s: number, f: any) => s + Math.max(0, (Number(f.net_amount) || 0) - (Number(f.amount_paid) || 0)), 0);
+      const totalPending = pendingFees.reduce((s: number, f: any) => s + Math.max(0, (Number(f.net_amount) || 0) - (Number(f.paid_amount) || 0)), 0);
 
       setStats({
         totalStudents: allStudents.filter((s: any) => s.status === 'active').length,
@@ -107,7 +107,7 @@ export function ReportsAnalytics() {
       const monthlyMap: Record<number, number> = {};
       allPayments.forEach((p: any) => {
         const m = new Date(p.payment_date).getMonth();
-        monthlyMap[m] = (monthlyMap[m] || 0) + Number(p.amount_paid || 0);
+        monthlyMap[m] = (monthlyMap[m] || 0) + Number(p.amount || 0);
       });
       setMonthlyFees(MONTHS.map((m, i) => ({ month: m, amount: Math.round(monthlyMap[i] || 0) })));
 
@@ -157,7 +157,7 @@ export function ReportsAnalytics() {
         setFeeDefaulters(defaulterRes.data.map((d: any) => ({
           ...d,
           student: studMap[d.student_id],
-          pending: Math.max(0, (Number(d.net_amount) || 0) - (Number(d.amount_paid) || 0)),
+          pending: Math.max(0, (Number(d.net_amount) || 0) - (Number(d.paid_amount) || 0)),
           daysOverdue: Math.ceil((new Date().getTime() - new Date(d.due_date).getTime()) / (1000 * 60 * 60 * 24)),
         })));
       }
