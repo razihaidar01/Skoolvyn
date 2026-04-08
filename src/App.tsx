@@ -11,6 +11,8 @@ import OtpLoginPage from "./pages/auth/OtpLoginPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
+import StudentPortal from "./pages/StudentPortal";
+import ParentPortal from "./pages/ParentPortal";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import InstitutionAdminDashboard from "./pages/InstitutionAdminDashboard";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
@@ -86,7 +88,7 @@ const App = () => (
             <Route path="/admin/fees/defaulters" element={<ProtectedRoute allowedRoles={['institution_admin', 'accountant', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
 
             {/* Coming Soon Modules */}
-            <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/timetable" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/library" element={<ProtectedRoute allowedRoles={['librarian', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/hostel" element={<ProtectedRoute allowedRoles={['hostel_warden', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/transport" element={<ProtectedRoute allowedRoles={['transport_manager', 'institution_admin']}><InstitutionAdminDashboard /></ProtectedRoute>} />
@@ -96,8 +98,8 @@ const App = () => (
 
             {/* Role Dashboards */}
             <Route path="/faculty/dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><DashboardPage /></ProtectedRoute>} />
-            <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><DashboardPage /></ProtectedRoute>} />
-            <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><DashboardPage /></ProtectedRoute>} />
+            <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
+            <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><ParentPortal /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
