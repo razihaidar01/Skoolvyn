@@ -13,6 +13,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import StudentPortal from "./pages/StudentPortal";
 import ParentPortal from "./pages/ParentPortal";
+import FacultyPortal from "./pages/FacultyPortal";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import InstitutionAdminDashboard from "./pages/InstitutionAdminDashboard";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
@@ -97,9 +98,9 @@ const App = () => (
             <Route path="/admin/events" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
 
             {/* Role Dashboards */}
-            <Route path="/faculty/dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><DashboardPage /></ProtectedRoute>} />
-            <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
-            <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><ParentPortal /></ProtectedRoute>} />
+            <Route path="/faculty/dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><FacultyPortal /></ProtectedRoute>} />
+            <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><DashboardPage /></ProtectedRoute>} />
+            <Route path="/parent/dashboard" element={<ProtectedRoute allowedRoles={['parent']}><DashboardPage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
