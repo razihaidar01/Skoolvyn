@@ -8,6 +8,7 @@ interface Profile {
   institution_id: string | null;
   first_name: string | null;
   last_name: string | null;
+  email: string | null;
   phone: string | null;
   is_active: boolean;
   approval_status?: string | null;
