@@ -21,6 +21,12 @@ import AccountRejectedPage from "./pages/AccountRejectedPage";
 import AccountSuspendedPage from "./pages/AccountSuspendedPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import NotFound from "./pages/NotFound";
+import HomePage from "./pages/landing/HomePage";
+import FeaturesPage from "./pages/landing/FeaturesPage";
+import PricingPage from "./pages/landing/PricingPage";
+import FaqPage from "./pages/landing/FaqPage";
+import AboutPage from "./pages/landing/AboutPage";
+import ContactPage from "./pages/landing/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -32,15 +38,21 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<LoginPage />} />
+            {/* Public landing pages */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/faq" element={<FaqPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+
+            {/* Auth routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/otp-login" element={<OtpLoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
             {/* Approval status pages */}
             <Route path="/pending-approval" element={<ProtectedRoute><PendingApprovalPage /></ProtectedRoute>} />
             <Route path="/account-rejected" element={<ProtectedRoute><AccountRejectedPage /></ProtectedRoute>} />
