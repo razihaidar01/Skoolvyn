@@ -35,6 +35,7 @@ import { AnnouncementsModule } from '@/components/admin/announcements/Announceme
 import { EventsModule } from '@/components/admin/events/EventsModule';
 import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
 import { ReportsAnalytics } from '@/components/admin/reports/ReportsAnalytics';
+import { SettingsModule } from '@/components/admin/settings/SettingsModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -75,7 +76,7 @@ const sidebarItems: SidebarItem[] = [
 
 const comingSoonRoutes = [
   '/admin/academic', '/admin/departments',
-  '/admin/library', '/admin/hostel', '/admin/transport', '/admin/settings',
+  '/admin/library', '/admin/hostel', '/admin/transport',
 ];
 
 function formatINR(amount: number): string {
@@ -211,6 +212,8 @@ export default function InstitutionAdminDashboard() {
   const isReports = currentPath === '/admin/reports';
 
   const isTimetable = currentPath === '/admin/timetable';
+
+  const isSettings = currentPath === '/admin/settings';
 
   const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
@@ -350,6 +353,8 @@ export default function InstitutionAdminDashboard() {
             <TimetableModule />
           ) : isReports ? (
             <ReportsAnalytics />
+          ) : isSettings ? (
+            <SettingsModule />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">
