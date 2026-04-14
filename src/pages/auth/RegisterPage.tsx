@@ -96,13 +96,17 @@ export default function RegisterPage() {
         },
       });
 
-      if (regError) throw new Error(regError.message);
-      if (regData?.error) throw new Error(regData.error);
+      if (regError) {
+        const msg = regError.message || (typeof regError === 'object' ? JSON.stringify(regError) : String(regError));
+        throw new Error(msg || 'Registration failed');
+      }
+      if (regData?.error) throw new Error(typeof regData.error === 'string' ? regData.error : JSON.stringify(regData.error));
 
       toast({ title: 'Registration successful!', description: 'Your institution is under review.' });
       navigate('/pending-approval');
     } catch (err: any) {
-      setInstError(err.message || 'Registration failed');
+      const errorMsg = err?.message || (typeof err === 'object' ? JSON.stringify(err) : 'Registration failed');
+      setInstError(errorMsg);
     }
     setInstLoading(false);
   };
