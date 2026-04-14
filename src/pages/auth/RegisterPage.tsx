@@ -109,7 +109,14 @@ export default function RegisterPage() {
       toast({ title: 'Registration successful!', description: 'Your institution is under review.' });
       navigate('/pending-approval');
     } catch (err: any) {
-      const errorMsg = err?.message || (typeof err === 'object' ? JSON.stringify(err) : 'Registration failed');
+      let errorMsg = 'Registration failed. Please try again.';
+      if (err instanceof Error && err.message) {
+        errorMsg = err.message;
+      } else if (typeof err === 'string') {
+        errorMsg = err;
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
       setInstError(errorMsg);
     }
     setInstLoading(false);
