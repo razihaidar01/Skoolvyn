@@ -35,6 +35,7 @@ import { AnnouncementsModule } from '@/components/admin/announcements/Announceme
 import { EventsModule } from '@/components/admin/events/EventsModule';
 import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
 import { ReportsAnalytics } from '@/components/admin/reports/ReportsAnalytics';
+import { AcademicSetup } from '@/components/admin/academic/AcademicSetup';
 import { SettingsModule } from '@/components/admin/settings/SettingsModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -74,10 +75,7 @@ const sidebarItems: SidebarItem[] = [
   { title: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
-const comingSoonRoutes = [
-  '/admin/academic', '/admin/departments',
-  '/admin/library', '/admin/hostel', '/admin/transport',
-];
+const comingSoonRoutes = [];
 
 function formatINR(amount: number): string {
   return '₹' + amount.toLocaleString('en-IN');
@@ -212,10 +210,10 @@ export default function InstitutionAdminDashboard() {
   const isReports = currentPath === '/admin/reports';
 
   const isTimetable = currentPath === '/admin/timetable';
-
+  const isAcademic = currentPath === '/admin/academic' || currentPath === '/admin/departments';
   const isSettings = currentPath === '/admin/settings';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -353,6 +351,8 @@ export default function InstitutionAdminDashboard() {
             <TimetableModule />
           ) : isReports ? (
             <ReportsAnalytics />
+          ) : isAcademic ? (
+            <AcademicSetup />
           ) : isSettings ? (
             <SettingsModule />
           ) : isComingSoon && !isDashboard ? (
