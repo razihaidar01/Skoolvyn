@@ -77,6 +77,10 @@ export default function RegisterPage() {
       });
       if (authError) throw new Error(authError.message);
       if (!authData.user) throw new Error('Failed to create account');
+      // Supabase returns a fake user with no identities if the email already exists
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      }
 
       const userId = authData.user.id;
 
