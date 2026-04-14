@@ -77,6 +77,10 @@ export default function RegisterPage() {
       });
       if (authError) throw new Error(authError.message);
       if (!authData.user) throw new Error('Failed to create account');
+      // Supabase returns a fake user with no identities if the email already exists
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      }
 
       const userId = authData.user.id;
 
@@ -96,13 +100,17 @@ export default function RegisterPage() {
         },
       });
 
-      if (regError) throw new Error(regError.message);
-      if (regData?.error) throw new Error(regData.error);
+      if (regError) {
+        const msg = regError.message || (typeof regError === 'object' ? JSON.stringify(regError) : String(regError));
+        throw new Error(msg || 'Registration failed');
+      }
+      if (regData?.error) throw new Error(typeof regData.error === 'string' ? regData.error : JSON.stringify(regData.error));
 
       toast({ title: 'Registration successful!', description: 'Your institution is under review.' });
       navigate('/pending-approval');
     } catch (err: any) {
-      setInstError(err.message || 'Registration failed');
+      const errorMsg = err?.message || (typeof err === 'object' ? JSON.stringify(err) : 'Registration failed');
+      setInstError(errorMsg);
     }
     setInstLoading(false);
   };
