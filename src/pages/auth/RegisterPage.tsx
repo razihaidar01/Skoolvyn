@@ -75,7 +75,7 @@ export default function RegisterPage() {
         password: instForm.adminPassword,
         options: { data: { first_name: instForm.adminName.split(' ')[0], last_name: instForm.adminName.split(' ').slice(1).join(' ') } },
       });
-      if (authError) throw new Error(authError.message);
+      if (authError) throw new Error(authError.message || 'Authentication failed. Please try again.');
       if (!authData.user) throw new Error('Failed to create account');
       // Supabase returns a fake user with no identities if the email already exists
       if (authData.user.identities && authData.user.identities.length === 0) {
