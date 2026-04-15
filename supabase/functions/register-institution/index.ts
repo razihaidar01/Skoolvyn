@@ -109,6 +109,20 @@ Deno.serve(async (req) => {
       if (roleError) console.error("Role insert error:", roleError);
     }
 
+    // 3b. Persist auth metadata for routing fallback on first login
+    const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        first_name: nameParts[0] || "",
+        last_name: nameParts.slice(1).join(" ") || null,
+        role: "institution_admin",
+        institution_id: inst.id,
+      },
+    });
+
+    if (metadataError) {
+      console.error("Metadata update error:", metadataError);
+    }
+
     // 4. Log the registration
     try {
       await supabaseAdmin.from("approval_logs").insert({
