@@ -65,7 +65,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setInstError('');
     const v = institutionSchema.safeParse(instForm);
-    if (!v.success) { setInstError(v.error.errors[0].message); return; }
+    if (!v.success) { setInstError(v.error.issues[0].message); return; }
 
     setInstLoading(true);
     try {
@@ -126,7 +126,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setStaffError('');
     const v = staffSchema.safeParse(staffForm);
-    if (!v.success) { setStaffError(v.error.errors[0].message); return; }
+    if (!v.success) { setStaffError(v.error.issues[0].message); return; }
 
     setStaffLoading(true);
     try {
