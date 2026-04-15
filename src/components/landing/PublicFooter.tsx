@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import skoolvynLogo from '@/assets/skoolvyn_logo.png';
 
 const footerLinks = [
   {
@@ -33,9 +34,7 @@ export default function PublicFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(221,80%,56%)] to-[hsl(260,80%,60%)]">
-                <span className="text-sm font-extrabold text-white">SK</span>
-              </div>
+              <img src={skoolvynLogo} alt="Skoolvyn logo" className="h-9 w-auto" />
               <span className="text-lg font-bold text-white tracking-tight">Skoolvyn</span>
             </div>
             <p className="text-sm text-white/50 leading-relaxed">

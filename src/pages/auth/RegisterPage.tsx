@@ -46,6 +46,28 @@ export default function RegisterPage() {
   const { toast } = useToast();
   const [tab, setTab] = useState('institution');
 
+  const formatError = (error: unknown, fallback = 'Something went wrong. Please try again.') => {
+    if (error instanceof Error && error.message.trim()) return error.message;
+    if (typeof error === 'string' && error.trim()) return error;
+
+    if (error && typeof error === 'object') {
+      const record = error as Record<string, unknown>;
+      const nestedMessage = [record.message, record.error, record.msg, record.details, record.hint]
+        .find((value): value is string => typeof value === 'string' && value.trim().length > 0);
+
+      if (nestedMessage) return nestedMessage;
+
+      try {
+        const serialized = JSON.stringify(error, Object.getOwnPropertyNames(error));
+        if (serialized && serialized !== '{}' && serialized !== '[]') return serialized;
+      } catch {
+        // Ignore serialization issues and use fallback.
+      }
+    }
+
+    return fallback;
+  };
+
   // Institution form
   const [instForm, setInstForm] = useState({
     institutionName: '', institutionType: 'school', adminName: '', adminEmail: '',
@@ -65,7 +87,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setInstError('');
     const v = institutionSchema.safeParse(instForm);
-    if (!v.success) { setInstError(v.error.errors[0].message); return; }
+    if (!v.success) { setInstError(v.error.issues[0].message); return; }
 
     setInstLoading(true);
     try {
@@ -100,24 +122,13 @@ export default function RegisterPage() {
         },
       });
 
-      if (regError) {
-        const msg = regError.message || (typeof regError === 'object' ? JSON.stringify(regError) : String(regError));
-        throw new Error(msg || 'Registration failed');
-      }
-      if (regData?.error) throw new Error(typeof regData.error === 'string' ? regData.error : JSON.stringify(regData.error));
+      if (regError) throw new Error(formatError(regError, 'Institution registration failed.'));
+      if (regData?.error) throw new Error(formatError(regData.error, 'Institution registration failed.'));
 
       toast({ title: 'Registration successful!', description: 'Your institution is under review.' });
       navigate('/pending-approval');
-    } catch (err: any) {
-      let errorMsg = 'Registration failed. Please try again.';
-      if (err instanceof Error && err.message) {
-        errorMsg = err.message;
-      } else if (typeof err === 'string') {
-        errorMsg = err;
-      } else if (err?.message) {
-        errorMsg = err.message;
-      }
-      setInstError(errorMsg);
+    } catch (err: unknown) {
+      setInstError(formatError(err, 'Registration failed. Please try again.'));
     }
     setInstLoading(false);
   };
@@ -126,7 +137,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setStaffError('');
     const v = staffSchema.safeParse(staffForm);
-    if (!v.success) { setStaffError(v.error.errors[0].message); return; }
+    if (!v.success) { setStaffError(v.error.issues[0].message); return; }
 
     setStaffLoading(true);
     try {
@@ -160,13 +171,13 @@ export default function RegisterPage() {
         },
       });
 
-      if (regError) throw new Error(regError.message);
-      if (regData?.error) throw new Error(regData.error);
+      if (regError) throw new Error(formatError(regError, 'Staff registration failed.'));
+      if (regData?.error) throw new Error(formatError(regData.error, 'Staff registration failed.'));
 
       toast({ title: 'Registration successful!', description: 'Your account is pending approval.' });
       navigate('/pending-approval');
-    } catch (err: any) {
-      setStaffError(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      setStaffError(formatError(err, 'Registration failed'));
     }
     setStaffLoading(false);
   };
