@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import skoolvynLogo from '@/assets/skoolvyn_logo.png';
 
 const navLinks = [
   { label: 'Features', href: '/features' },
@@ -26,9 +27,7 @@ export default function PublicNavbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(221,80%,56%)] to-[hsl(260,80%,60%)]">
-            <span className="text-sm font-extrabold text-white">SK</span>
-          </div>
+          <img src={skoolvynLogo} alt="Skoolvyn logo" className="h-9 w-auto" />
           <span className="text-lg font-bold text-white tracking-tight">Skoolvyn</span>
         </Link>
 

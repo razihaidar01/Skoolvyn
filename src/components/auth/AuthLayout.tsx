@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import skoolvynLogo from '@/assets/skoolvyn_logo.png';
 
 export function AuthLayout({ children, title, subtitle }: { children: ReactNode; title: string; subtitle?: string }) {
   return (
@@ -12,9 +13,7 @@ export function AuthLayout({ children, title, subtitle }: { children: ReactNode;
         </div>
         <div className="relative z-10 text-primary-foreground text-center px-12 max-w-lg">
           <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-primary-foreground/20 flex items-center justify-center">
-              <span className="text-2xl font-bold">SK</span>
-            </div>
+            <img src={skoolvynLogo} alt="Skoolvyn logo" className="h-20 w-auto drop-shadow-2xl" />
           </div>
           <h1 className="text-4xl font-bold mb-4">Skoolvyn</h1>
           <p className="text-lg text-primary-foreground/80 leading-relaxed">
@@ -28,9 +27,7 @@ export function AuthLayout({ children, title, subtitle }: { children: ReactNode;
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-lg font-bold text-primary-foreground">SK</span>
-            </div>
+            <img src={skoolvynLogo} alt="Skoolvyn logo" className="h-10 w-auto" />
             <span className="text-2xl font-bold text-foreground">Skoolvyn</span>
           </div>
 
