@@ -55,17 +55,17 @@ function getApprovalRedirect(role: string | null, profile: any, institutionAppro
 }
 
 async function fetchUserRoleAndProfile(userId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const metadataRole = user?.user_metadata?.role as string | null;
+  const metadataInstitutionId = user?.user_metadata?.institution_id as string | null;
+
   const { data: profile, error: profileError } = await (supabase as any)
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (profileError || !profile) {
-    // Fallback: check user metadata for role
-    const { data: { user } } = await supabase.auth.getUser();
-    const metadataRole = user?.user_metadata?.role as string | null;
-    const metadataInstitutionId = user?.user_metadata?.institution_id as string | null;
     return { profile: null, role: metadataRole || null, institutionId: metadataInstitutionId || null, institutionApprovalStatus: null, error: null };
   }
 
@@ -74,38 +74,58 @@ async function fetchUserRoleAndProfile(userId: string) {
     .select('role_id, institution_id')
     .eq('user_id', userId)
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  let roleName: string | null = null;
-  let institutionId: string | null = userRole?.institution_id || profile.institution_id;
+  let roleName: string | null = metadataRole || null;
+  let institutionId: string | null = userRole?.institution_id || profile.institution_id || metadataInstitutionId || null;
 
   if (userRole?.role_id) {
     const { data: roleData } = await (supabase as any)
       .from('roles')
       .select('name')
       .eq('id', userRole.role_id)
-      .single();
-    roleName = roleData?.name || null;
+      .maybeSingle();
+    roleName = roleData?.name || roleName;
   }
 
-  // Check institution approval status for institution_admin
   let institutionApprovalStatus: string | null = null;
-  if (roleName === 'institution_admin') {
+  let registeredInstitutionId: string | null = null;
+
+  const { data: registeredInstitution } = await (supabase as any)
+    .from('institutions')
+    .select('id, approval_status')
+    .eq('registered_by', userId)
+    .maybeSingle();
+
+  if (registeredInstitution) {
+    registeredInstitutionId = registeredInstitution.id;
+    institutionApprovalStatus = registeredInstitution.approval_status || null;
+    roleName = roleName || 'institution_admin';
+    institutionId = institutionId || registeredInstitution.id;
+  }
+
+  if (roleName === 'institution_admin' && !institutionApprovalStatus) {
     const { data: inst } = await (supabase as any)
       .from('institutions')
       .select('approval_status')
-      .eq('registered_by', userId)
-      .single();
+      .eq('id', institutionId)
+      .maybeSingle();
     institutionApprovalStatus = inst?.approval_status || null;
   }
 
-  if (roleName || institutionId) {
+  if ((roleName && roleName !== metadataRole) || (institutionId && institutionId !== metadataInstitutionId)) {
     await supabase.auth.updateUser({
       data: { role: roleName, institution_id: institutionId },
     });
   }
 
-  return { profile, role: roleName, institutionId, institutionApprovalStatus, error: null };
+  return {
+    profile,
+    role: roleName,
+    institutionId: institutionId || registeredInstitutionId,
+    institutionApprovalStatus,
+    error: null,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
