@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Building2, UserPlus } from 'lucide-react';
+import { Loader2, Building2, UserPlus, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { INDIAN_STATES } from '@/lib/indian-states';
 
@@ -35,10 +35,8 @@ const staffSchema = z.object({
 });
 
 const STAFF_ROLES = [
-  'hod',
-  'hr_manager',
-  'principal', 'faculty', 'accountant', 'librarian',
-  'hostel_warden', 'transport_manager',
+  'principal', 'hod', 'hr_manager', 'faculty',
+  'accountant', 'librarian', 'hostel_warden', 'transport_manager',
 ];
 
 export default function RegisterPage() {
@@ -46,29 +44,6 @@ export default function RegisterPage() {
   const { toast } = useToast();
   const [tab, setTab] = useState('institution');
 
-  const formatError = (error: unknown, fallback = 'Something went wrong. Please try again.') => {
-    if (error instanceof Error && error.message.trim()) return error.message;
-    if (typeof error === 'string' && error.trim()) return error;
-
-    if (error && typeof error === 'object') {
-      const record = error as Record<string, unknown>;
-      const nestedMessage = [record.message, record.error, record.msg, record.details, record.hint]
-        .find((value): value is string => typeof value === 'string' && value.trim().length > 0);
-
-      if (nestedMessage) return nestedMessage;
-
-      try {
-        const serialized = JSON.stringify(error, Object.getOwnPropertyNames(error));
-        if (serialized && serialized !== '{}' && serialized !== '[]') return serialized;
-      } catch {
-        // Ignore serialization issues and use fallback.
-      }
-    }
-
-    return fallback;
-  };
-
-  // Institution form
   const [instForm, setInstForm] = useState({
     institutionName: '', institutionType: 'school', adminName: '', adminEmail: '',
     adminPassword: '', phone: '', city: '', state: '', address: '', website: '',
@@ -76,44 +51,29 @@ export default function RegisterPage() {
   const [instLoading, setInstLoading] = useState(false);
   const [instError, setInstError] = useState('');
 
-  // Staff form
   const [staffForm, setStaffForm] = useState({
     fullName: '', email: '', password: '', phone: '', institutionCode: '', role: '',
   });
   const [staffLoading, setStaffLoading] = useState(false);
   const [staffError, setStaffError] = useState('');
 
+  // KEY CHANGE: Send everything to edge function including password
+  // Edge function uses admin API to create user — NO client-side auth.signUp timeout!
   const handleInstitutionRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setInstError('');
     const v = institutionSchema.safeParse(instForm);
-    if (!v.success) { setInstError(v.error.issues[0].message); return; }
+    if (!v.success) { setInstError(v.error.errors[0].message); return; }
 
     setInstLoading(true);
     try {
-      // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: instForm.adminEmail,
-        password: instForm.adminPassword,
-        options: { data: { first_name: instForm.adminName.split(' ')[0], last_name: instForm.adminName.split(' ').slice(1).join(' ') } },
-      });
-      if (authError) throw new Error(authError.message || 'Authentication failed. Please try again.');
-      if (!authData.user) throw new Error('Failed to create account');
-      // Supabase returns a fake user with no identities if the email already exists
-      if (authData.user.identities && authData.user.identities.length === 0) {
-        throw new Error('An account with this email already exists. Please sign in instead.');
-      }
-
-      const userId = authData.user.id;
-
-      // 2. Insert institution (using service role via edge function)
-      const { data: regData, error: regError } = await supabase.functions.invoke('register-institution', {
+      const { data, error } = await supabase.functions.invoke('register-institution', {
         body: {
-          userId,
           institutionName: instForm.institutionName,
           institutionType: instForm.institutionType,
           adminName: instForm.adminName,
           email: instForm.adminEmail,
+          password: instForm.adminPassword,
           phone: instForm.phone,
           city: instForm.city,
           state: instForm.state,
@@ -122,13 +82,36 @@ export default function RegisterPage() {
         },
       });
 
-      if (regError) throw new Error(formatError(regError, 'Institution registration failed.'));
-      if (regData?.error) throw new Error(formatError(regData.error, 'Institution registration failed.'));
+      if (error) {
+        const msg = error.message || String(error);
+        throw new Error(msg.includes('{}') || msg.includes('fetch') ? 'Server connection issue. Please try again.' : msg);
+      }
+      if (data?.error) throw new Error(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
 
-      toast({ title: 'Registration successful!', description: 'Your institution is under review.' });
-      navigate('/pending-approval');
-    } catch (err: unknown) {
-      setInstError(formatError(err, 'Registration failed. Please try again.'));
+      // Auto sign in after registration
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: instForm.adminEmail,
+        password: instForm.adminPassword,
+      });
+
+      if (signInError) {
+        // Even if sign-in fails, registration succeeded
+        toast({ title: '✅ Registration successful!', description: 'Your institution is pending approval. Please sign in.' });
+        navigate('/login');
+      } else {
+        toast({ title: '✅ Registered! Pending approval.', description: 'We will review and approve your institution shortly.' });
+        navigate('/pending-approval');
+      }
+
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('{}') || msg.includes('fetch') || msg.includes('504') || msg.includes('timeout')) {
+        setInstError('Connection error. Please try again in a moment.');
+      } else if (msg.includes('already') || msg.includes('exists')) {
+        setInstError('This email is already registered. Please sign in instead.');
+      } else {
+        setInstError(msg || 'Registration failed. Please try again.');
+      }
     }
     setInstLoading(false);
   };
@@ -137,74 +120,68 @@ export default function RegisterPage() {
     e.preventDefault();
     setStaffError('');
     const v = staffSchema.safeParse(staffForm);
-    if (!v.success) { setStaffError(v.error.issues[0].message); return; }
+    if (!v.success) { setStaffError(v.error.errors[0].message); return; }
 
     setStaffLoading(true);
     try {
-      // 1. Verify institution code via secure RPC
-      const { data: instResults } = await (supabase as any)
-        .rpc('lookup_institution_by_code', { p_code: staffForm.institutionCode.toUpperCase() });
-
-      const inst = instResults?.[0];
-      if (!inst) throw new Error('Invalid institution code. Please check with your admin.');
-
-      // 2. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: staffForm.email,
-        password: staffForm.password,
-        options: { data: { first_name: staffForm.fullName.split(' ')[0], last_name: staffForm.fullName.split(' ').slice(1).join(' ') } },
-      });
-      if (authError) throw new Error(authError.message);
-      if (!authData.user) throw new Error('Failed to create account');
-
-      const userId = authData.user.id;
-
-      // 3. Register staff via edge function
-      const { data: regData, error: regError } = await supabase.functions.invoke('register-staff', {
+      const { data, error } = await supabase.functions.invoke('register-staff', {
         body: {
-          userId,
           fullName: staffForm.fullName,
           email: staffForm.email,
+          password: staffForm.password,
           phone: staffForm.phone,
-          institutionId: inst.id,
+          institutionCode: staffForm.institutionCode.toUpperCase(),
           roleName: staffForm.role,
         },
       });
 
-      if (regError) throw new Error(formatError(regError, 'Staff registration failed.'));
-      if (regData?.error) throw new Error(formatError(regData.error, 'Staff registration failed.'));
+      if (error) throw new Error(error.message || 'Registration failed');
+      if (data?.error) throw new Error(data.error);
 
-      toast({ title: 'Registration successful!', description: 'Your account is pending approval.' });
-      navigate('/pending-approval');
-    } catch (err: unknown) {
-      setStaffError(formatError(err, 'Registration failed'));
+      // Auto sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: staffForm.email,
+        password: staffForm.password,
+      });
+
+      if (signInError) {
+        toast({ title: '✅ Registration successful!', description: 'Pending approval. Please sign in.' });
+        navigate('/login');
+      } else {
+        toast({ title: '✅ Registered! Pending approval.' });
+        navigate('/pending-approval');
+      }
+
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('{}') || msg.includes('fetch') || msg.includes('504')) {
+        setStaffError('Connection error. Please try again.');
+      } else {
+        setStaffError(msg || 'Registration failed. Please try again.');
+      }
     }
     setStaffLoading(false);
   };
+
+  const up = (k: string, v: string) => setInstForm(f => ({ ...f, [k]: v }));
+  const sp = (k: string, v: string) => setStaffForm(f => ({ ...f, [k]: v }));
 
   return (
     <AuthLayout title="Create your account" subtitle="Register your institution or join as staff">
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="institution" className="gap-2">
-            <Building2 className="w-4 h-4" />
-            Institution
-          </TabsTrigger>
-          <TabsTrigger value="staff" className="gap-2">
-            <UserPlus className="w-4 h-4" />
-            Staff / Faculty
-          </TabsTrigger>
+          <TabsTrigger value="institution" className="gap-2"><Building2 className="w-4 h-4" />Institution</TabsTrigger>
+          <TabsTrigger value="staff" className="gap-2"><UserPlus className="w-4 h-4" />Staff / Faculty</TabsTrigger>
         </TabsList>
 
+        {/* INSTITUTION */}
         <TabsContent value="institution">
           <form onSubmit={handleInstitutionRegister} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label>Institution Name *</Label>
-              <Input value={instForm.institutionName} onChange={e => setInstForm({ ...instForm, institutionName: e.target.value })} placeholder="e.g. Delhi Public School" />
+            <div className="space-y-1.5"><Label>Institution Name *</Label>
+              <Input value={instForm.institutionName} onChange={e => up('institutionName', e.target.value)} placeholder="e.g. Delhi Public School" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Institution Type *</Label>
-              <Select value={instForm.institutionType} onValueChange={v => setInstForm({ ...instForm, institutionType: v })}>
+            <div className="space-y-1.5"><Label>Institution Type *</Label>
+              <Select value={instForm.institutionType} onValueChange={v => up('institutionType', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="school">School</SelectItem>
@@ -214,86 +191,84 @@ export default function RegisterPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>Admin Full Name *</Label>
-              <Input value={instForm.adminName} onChange={e => setInstForm({ ...instForm, adminName: e.target.value })} placeholder="Your full name" />
+            <div className="space-y-1.5"><Label>Admin Full Name *</Label>
+              <Input value={instForm.adminName} onChange={e => up('adminName', e.target.value)} placeholder="Your full name" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Admin Email *</Label>
-                <Input type="email" value={instForm.adminEmail} onChange={e => setInstForm({ ...instForm, adminEmail: e.target.value })} placeholder="admin@school.edu" />
+              <div className="space-y-1.5"><Label>Admin Email *</Label>
+                <Input type="email" value={instForm.adminEmail} onChange={e => up('adminEmail', e.target.value)} placeholder="admin@school.edu" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Password *</Label>
-                <Input type="password" value={instForm.adminPassword} onChange={e => setInstForm({ ...instForm, adminPassword: e.target.value })} placeholder="Min 8 characters" />
+              <div className="space-y-1.5"><Label>Password *</Label>
+                <Input type="password" value={instForm.adminPassword} onChange={e => up('adminPassword', e.target.value)} placeholder="Min 8 characters" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Phone *</Label>
-              <Input value={instForm.phone} onChange={e => setInstForm({ ...instForm, phone: e.target.value })} placeholder="+91 98765 43210" />
+            <div className="space-y-1.5"><Label>Phone *</Label>
+              <Input value={instForm.phone} onChange={e => up('phone', e.target.value)} placeholder="+91 98765 43210" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>City *</Label>
-                <Input value={instForm.city} onChange={e => setInstForm({ ...instForm, city: e.target.value })} placeholder="New Delhi" />
+              <div className="space-y-1.5"><Label>City *</Label>
+                <Input value={instForm.city} onChange={e => up('city', e.target.value)} placeholder="New Delhi" />
               </div>
-              <div className="space-y-1.5">
-                <Label>State *</Label>
-                <Select value={instForm.state} onValueChange={v => setInstForm({ ...instForm, state: v })}>
+              <div className="space-y-1.5"><Label>State *</Label>
+                <Select value={instForm.state} onValueChange={v => up('state', v)}>
                   <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
-                  <SelectContent>
-                    {INDIAN_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{INDIAN_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Address</Label>
-              <Input value={instForm.address} onChange={e => setInstForm({ ...instForm, address: e.target.value })} placeholder="Full address" />
+            <div className="space-y-1.5"><Label>Address</Label>
+              <Input value={instForm.address} onChange={e => up('address', e.target.value)} placeholder="Full address" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Website (optional)</Label>
-              <Input value={instForm.website} onChange={e => setInstForm({ ...instForm, website: e.target.value })} placeholder="https://school.edu" />
+            <div className="space-y-1.5"><Label>Website (optional)</Label>
+              <Input value={instForm.website} onChange={e => up('website', e.target.value)} placeholder="https://school.edu" />
             </div>
 
+            {instLoading && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-blue-700 font-medium">Registering your institution...</p>
+                  <p className="text-xs text-blue-500">This may take 15-30 seconds. Please wait.</p>
+                </div>
+              </div>
+            )}
+
             {instError && (
-              <div className="bg-destructive/10 text-destructive text-sm rounded-lg p-3 border border-destructive/20">{instError}</div>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{instError}</p>
+              </div>
             )}
 
             <Button type="submit" className="w-full" size="lg" disabled={instLoading}>
-              {instLoading && <Loader2 className="animate-spin mr-2" />}
-              Register Institution
+              {instLoading ? <><Loader2 className="animate-spin mr-2 w-4 h-4" />Registering...</> : 'Register Institution'}
             </Button>
           </form>
         </TabsContent>
 
+        {/* STAFF */}
         <TabsContent value="staff">
           <form onSubmit={handleStaffRegister} className="space-y-3">
-            <div className="space-y-1.5">
-              <Label>Full Name *</Label>
-              <Input value={staffForm.fullName} onChange={e => setStaffForm({ ...staffForm, fullName: e.target.value })} placeholder="Your full name" />
+            <div className="space-y-1.5"><Label>Full Name *</Label>
+              <Input value={staffForm.fullName} onChange={e => sp('fullName', e.target.value)} placeholder="Your full name" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Email *</Label>
-                <Input type="email" value={staffForm.email} onChange={e => setStaffForm({ ...staffForm, email: e.target.value })} placeholder="you@email.com" />
+              <div className="space-y-1.5"><Label>Email *</Label>
+                <Input type="email" value={staffForm.email} onChange={e => sp('email', e.target.value)} placeholder="you@email.com" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Password *</Label>
-                <Input type="password" value={staffForm.password} onChange={e => setStaffForm({ ...staffForm, password: e.target.value })} placeholder="Min 8 characters" />
+              <div className="space-y-1.5"><Label>Password *</Label>
+                <Input type="password" value={staffForm.password} onChange={e => sp('password', e.target.value)} placeholder="Min 8 characters" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Phone *</Label>
-              <Input value={staffForm.phone} onChange={e => setStaffForm({ ...staffForm, phone: e.target.value })} placeholder="+91 98765 43210" />
+            <div className="space-y-1.5"><Label>Phone *</Label>
+              <Input value={staffForm.phone} onChange={e => sp('phone', e.target.value)} placeholder="+91 98765 43210" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Institution Code *</Label>
-              <Input value={staffForm.institutionCode} onChange={e => setStaffForm({ ...staffForm, institutionCode: e.target.value })} placeholder="Get this from your institution admin" className="uppercase" />
+            <div className="space-y-1.5"><Label>Institution Code *</Label>
+              <Input value={staffForm.institutionCode} onChange={e => sp('institutionCode', e.target.value)}
+                placeholder="Get this from your institution admin" className="uppercase" />
             </div>
-            <div className="space-y-1.5">
-              <Label>Role *</Label>
-              <Select value={staffForm.role} onValueChange={v => setStaffForm({ ...staffForm, role: v })}>
+            <div className="space-y-1.5"><Label>Role *</Label>
+              <Select value={staffForm.role} onValueChange={v => sp('role', v)}>
                 <SelectTrigger><SelectValue placeholder="Select your role" /></SelectTrigger>
                 <SelectContent>
                   {STAFF_ROLES.map(r => (
@@ -303,13 +278,22 @@ export default function RegisterPage() {
               </Select>
             </div>
 
+            {staffLoading && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-500 flex-shrink-0" />
+                <p className="text-sm text-blue-700">Registering... Please wait.</p>
+              </div>
+            )}
+
             {staffError && (
-              <div className="bg-destructive/10 text-destructive text-sm rounded-lg p-3 border border-destructive/20">{staffError}</div>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{staffError}</p>
+              </div>
             )}
 
             <Button type="submit" className="w-full" size="lg" disabled={staffLoading}>
-              {staffLoading && <Loader2 className="animate-spin mr-2" />}
-              Submit Registration
+              {staffLoading ? <><Loader2 className="animate-spin mr-2 w-4 h-4" />Registering...</> : 'Submit Registration'}
             </Button>
           </form>
         </TabsContent>

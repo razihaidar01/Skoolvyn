@@ -59,78 +59,71 @@ async function fetchUserRoleAndProfile(userId: string) {
   const metadataRole = user?.user_metadata?.role as string | null;
   const metadataInstitutionId = user?.user_metadata?.institution_id as string | null;
 
-  // Fetch profile
-  const { data: profile } = await (supabase as any)
+  const { data: profile, error: profileError } = await (supabase as any)
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .maybeSingle();
 
+  if (profileError || !profile) {
+    return { profile: null, role: metadataRole || null, institutionId: metadataInstitutionId || null, institutionApprovalStatus: null, error: null };
+  }
+
+  const { data: userRole } = await (supabase as any)
+    .from('user_roles')
+    .select('role_id, institution_id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+
   let roleName: string | null = metadataRole || null;
-  let institutionId: string | null = profile?.institution_id || metadataInstitutionId || null;
+  let institutionId: string | null = userRole?.institution_id || profile.institution_id || metadataInstitutionId || null;
+
+  if (userRole?.role_id) {
+    const { data: roleData } = await (supabase as any)
+      .from('roles')
+      .select('name')
+      .eq('id', userRole.role_id)
+      .maybeSingle();
+    roleName = roleData?.name || roleName;
+  }
+
   let institutionApprovalStatus: string | null = null;
   let registeredInstitutionId: string | null = null;
 
-  // Try user_roles table (may be blocked by RLS for new users)
-  try {
-    const { data: userRole } = await (supabase as any)
-      .from('user_roles')
-      .select('role_id, institution_id')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
-
-    if (userRole?.institution_id) institutionId = userRole.institution_id;
-
-    if (userRole?.role_id) {
-      const { data: roleData } = await (supabase as any)
-        .from('roles')
-        .select('name')
-        .eq('id', userRole.role_id)
-        .maybeSingle();
-      if (roleData?.name) roleName = roleData.name;
-    }
-  } catch (_) { /* RLS may block this — handled below */ }
-
-  // Fallback: check institutions registered_by this user
-  try {
+  // Only check registered_by if role is still unknown (NOT super_admin)
+  if (!roleName || (roleName !== 'super_admin')) {
     const { data: registeredInstitution } = await (supabase as any)
       .from('institutions')
-      .select('id, approval_status, is_active')
+      .select('id, approval_status')
       .eq('registered_by', userId)
       .maybeSingle();
 
-    if (registeredInstitution) {
+    if (registeredInstitution && roleName !== 'super_admin') {
       registeredInstitutionId = registeredInstitution.id;
       institutionApprovalStatus = registeredInstitution.approval_status || null;
       if (!roleName) roleName = 'institution_admin';
       if (!institutionId) institutionId = registeredInstitution.id;
     }
-  } catch (_) { /* ignore */ }
-
-  // Fallback: check institutions by profile.institution_id
-  if (!institutionApprovalStatus && institutionId) {
-    try {
-      const { data: inst } = await (supabase as any)
-        .from('institutions')
-        .select('id, approval_status, is_active')
-        .eq('id', institutionId)
-        .maybeSingle();
-      if (inst) {
-        institutionApprovalStatus = inst.approval_status || null;
-        if (!roleName && inst.is_active) roleName = 'institution_admin';
-      }
-    } catch (_) { /* ignore */ }
   }
 
-  // Final fallback: if profile exists with institution_id but still no role
-  if (!roleName && profile?.institution_id) {
-    roleName = 'institution_admin';
-    institutionId = profile.institution_id;
+  if (roleName === 'institution_admin' && !institutionApprovalStatus && institutionId) {
+    const { data: inst } = await (supabase as any)
+      .from('institutions')
+      .select('approval_status')
+      .eq('id', institutionId)
+      .maybeSingle();
+    institutionApprovalStatus = inst?.approval_status || null;
   }
 
-  // Cache role in metadata for faster future logins
-  if ((roleName && roleName !== metadataRole) || (institutionId && institutionId !== metadataInstitutionId)) {
+  // Cache role in user metadata for faster future logins
+  // But NEVER downgrade super_admin role
+  const shouldUpdateMetadata = (
+    roleName && roleName !== metadataRole &&
+    !(metadataRole === 'super_admin' && roleName !== 'super_admin')
+  ) || (institutionId && institutionId !== metadataInstitutionId);
+  
+  if (shouldUpdateMetadata) {
     try {
       await supabase.auth.updateUser({
         data: { role: roleName, institution_id: institutionId },
@@ -139,7 +132,7 @@ async function fetchUserRoleAndProfile(userId: string) {
   }
 
   return {
-    profile: profile || null,
+    profile,
     role: roleName,
     institutionId: institutionId || registeredInstitutionId,
     institutionApprovalStatus,
