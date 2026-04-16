@@ -11,32 +11,32 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Safe JSON parsing
-    let body;
+    let body: any;
     try {
       const text = await req.text();
       if (!text || text.trim() === '') {
-        return new Response(
-          JSON.stringify({ error: "Empty request body" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return new Response(JSON.stringify({ error: "Empty request body" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
       }
       body = JSON.parse(text);
-    } catch (e) {
-      return new Response(
-        JSON.stringify({ error: "Invalid JSON body" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
-    const { userId, institutionName, institutionType, adminName, email, phone, city, state, address, website } = body;
+    const {
+      institutionName, institutionType, adminName, email, password,
+      phone, city, state, address, website,
+      // Legacy: userId passed from client (if client already created user)
+      userId: clientUserId,
+    } = body;
 
-    // Validate required fields
-    if (!userId || !institutionName || !email) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: userId, institutionName, email" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!institutionName || !email) {
+      return new Response(JSON.stringify({ error: "institutionName and email are required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
     }
 
     const supabaseAdmin = createClient(
@@ -44,54 +44,115 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // 1. Insert institution
-    const { data: inst, error: instError } = await supabaseAdmin
-      .from("institutions")
-      .insert({
-        name: institutionName,
-        type: institutionType || "school",
-        email,
-        phone: phone || null,
-        city: city || null,
-        state: state || null,
-        address: address || null,
-        website: website || null,
-        approval_status: "pending",
-        is_active: false,
-        registered_by: userId,
-        contact_person: adminName,
-      })
-      .select("id, institution_code")
-      .single();
+    let userId = clientUserId;
 
-    if (instError) {
-      console.error("Institution insert error:", instError);
-      return new Response(
-        JSON.stringify({ error: instError.message }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // If no userId provided (new flow), create user server-side using service role
+    // This avoids client-side auth.signUp timeouts completely
+    if (!userId) {
+      if (!password) {
+        return new Response(JSON.stringify({ error: "password is required for new registration" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      // Check if user already exists
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+      const existing = existingUsers?.users?.find(u => u.email === email);
+      
+      if (existing) {
+        userId = existing.id;
+      } else {
+        // Create user via admin API (no timeout issues!)
+        const nameParts = (adminName || "").split(" ");
+        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true, // auto-confirm
+          user_metadata: {
+            first_name: nameParts[0] || "",
+            last_name: nameParts.slice(1).join(" ") || "",
+          },
+        });
+
+        if (createError) {
+          console.error("Create user error:", createError);
+          return new Response(JSON.stringify({ error: createError.message }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+
+        userId = newUser.user?.id;
+      }
     }
 
-    // 2. Insert/update profile
-    const nameParts = (adminName || "").split(" ");
-    const { error: profileError } = await supabaseAdmin
-      .from("profiles")
-      .upsert({
-        id: userId,
-        first_name: nameParts[0] || "",
-        last_name: nameParts.slice(1).join(" ") || null,
-        email,
-        phone: phone || null,
-        institution_id: inst.id,
-        approval_status: "pending",
-        is_active: false,
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Failed to get or create user" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
-
-    if (profileError) {
-      console.error("Profile insert error:", profileError);
     }
 
-    // 3. Get institution_admin role id
+    // Check if institution already registered by this user
+    const { data: existingInst } = await supabaseAdmin
+      .from("institutions")
+      .select("id, institution_code")
+      .eq("registered_by", userId)
+      .maybeSingle();
+
+    let instId: string;
+    let instCode: string;
+
+    if (existingInst) {
+      instId = existingInst.id;
+      instCode = existingInst.institution_code;
+    } else {
+      // Generate institution code
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+      const { data: inst, error: instError } = await supabaseAdmin
+        .from("institutions")
+        .insert({
+          name: institutionName,
+          type: institutionType || "school",
+          email,
+          phone: phone || null,
+          city: city || null,
+          state: state || null,
+          address: address || null,
+          website: website || null,
+          institution_code: code,
+          approval_status: "pending",
+          is_active: false,
+          registered_by: userId,
+          contact_person: adminName || null,
+        })
+        .select("id, institution_code")
+        .single();
+
+      if (instError) {
+        console.error("Institution insert error:", instError);
+        return new Response(JSON.stringify({ error: instError.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" }
+        });
+      }
+
+      instId = inst.id;
+      instCode = inst.institution_code;
+    }
+
+    // Upsert profile
+    const nameParts = (adminName || "").split(" ");
+    await supabaseAdmin.from("profiles").upsert({
+      id: userId,
+      first_name: nameParts[0] || "",
+      last_name: nameParts.slice(1).join(" ") || null,
+      email,
+      phone: phone || null,
+      institution_id: instId,
+      approval_status: "pending",
+      is_active: false,
+    });
+
+    // Assign institution_admin role
     const { data: roleData } = await supabaseAdmin
       .from("roles")
       .select("id")
@@ -99,121 +160,63 @@ Deno.serve(async (req) => {
       .single();
 
     if (roleData) {
-      const { error: roleError } = await supabaseAdmin
-        .from("user_roles")
-        .insert({
-          user_id: userId,
-          role_id: roleData.id,
-          institution_id: inst.id,
-        });
-      if (roleError) console.error("Role insert error:", roleError);
+      await supabaseAdmin.from("user_roles").upsert({
+        user_id: userId,
+        role_id: roleData.id,
+        institution_id: instId,
+      }, { onConflict: 'user_id,role_id,institution_id' });
     }
 
-    // 3b. Persist auth metadata for routing fallback on first login
-    const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        first_name: nameParts[0] || "",
-        last_name: nameParts.slice(1).join(" ") || null,
-        role: "institution_admin",
-        institution_id: inst.id,
-      },
-    });
-
-    if (metadataError) {
-      console.error("Metadata update error:", metadataError);
-    }
-
-    // 4. Log the registration
+    // Notify super admins
     try {
-      await supabaseAdmin.from("approval_logs").insert({
-        action: "approved", // using valid enum value for log
-        target_type: "institution",
-        target_user_id: userId,
-        institution_id: inst.id,
-        reason: "New institution registration - pending approval",
-      });
-    } catch (logErr) {
-      console.error("Log error:", logErr);
-    }
-
-    // 5. Notify super admins via notifications table
-    try {
-      const { data: superAdminProfiles } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("approval_status", "approved");
-
-      const { data: superAdminRoles } = await supabaseAdmin
-        .from("user_roles")
-        .select("user_id")
-        .eq("role_id", (
-          await supabaseAdmin
-            .from("roles")
-            .select("id")
-            .eq("name", "super_admin")
-            .single()
-        ).data?.id);
-
-      if (superAdminRoles?.length) {
-        const notifications = superAdminRoles.map((sa: any) => ({
-          user_id: sa.user_id,
-          institution_id: inst.id,
-          title: "New Institution Registration",
-          body: `${institutionName} has registered and is pending approval.`,
-          type: "approval",
-        }));
-        await supabaseAdmin.from("notifications").insert(notifications);
+      const { data: superRoleData } = await supabaseAdmin
+        .from("roles").select("id").eq("name", "super_admin").single();
+      if (superRoleData) {
+        const { data: superAdmins } = await supabaseAdmin
+          .from("user_roles").select("user_id").eq("role_id", superRoleData.id);
+        if (superAdmins?.length) {
+          await supabaseAdmin.from("notifications").insert(
+            superAdmins.map((sa: any) => ({
+              user_id: sa.user_id,
+              institution_id: instId,
+              title: "New Institution Registration",
+              body: `${institutionName} has registered and is pending approval.`,
+              type: "approval",
+              sent_at: new Date().toISOString(),
+            }))
+          );
+        }
       }
-    } catch (notifErr) {
-      console.error("Notification error (non-fatal):", notifErr);
-    }
+    } catch (e) { console.error("Notification error (non-fatal):", e); }
 
-    // 6. Send email to super admin via Resend
+    // Send email
     try {
       const resendKey = Deno.env.get("RESEND_API_KEY");
       if (resendKey) {
         await fetch("https://api.resend.com/emails", {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendKey}`,
-            "Content-Type": "application/json",
-          },
+          headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: "Skoolvyn <onboarding@resend.dev>",
             to: ["razihaidar9342@gmail.com"],
-            subject: `New Institution Registration: ${institutionName}`,
-            html: `
-              <h2>New Institution Registration</h2>
-              <p><strong>${institutionName}</strong> has registered on Skoolvyn and is pending your approval.</p>
-              <ul>
-                <li><strong>Type:</strong> ${institutionType}</li>
-                <li><strong>Admin:</strong> ${adminName}</li>
-                <li><strong>Email:</strong> ${email}</li>
-                <li><strong>City:</strong> ${city}, ${state}</li>
-              </ul>
-              <p><a href="https://skoolvyn.vercel.app/super-admin/dashboard">Login to approve</a></p>
-            `,
+            subject: `New Registration: ${institutionName}`,
+            html: `<h2>New Institution Registration</h2><p><strong>${institutionName}</strong> has registered and is pending approval.</p><ul><li>Admin: ${adminName}</li><li>Email: ${email}</li><li>City: ${city}, ${state}</li></ul><p><a href="https://skoolvyn.vercel.app/super-admin/approvals">Approve now</a></p>`,
           }),
         });
       }
-    } catch (emailErr) {
-      console.error("Email error (non-fatal):", emailErr);
-    }
+    } catch (e) { console.error("Email error (non-fatal):", e); }
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        institutionCode: inst.institution_code,
-        institutionId: inst.id 
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({
+      success: true,
+      institutionCode: instCode,
+      institutionId: instId,
+      userId,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (err) {
     console.error("Unexpected error:", err);
-    return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({
+      error: err instanceof Error ? err.message : "Internal server error"
+    }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
