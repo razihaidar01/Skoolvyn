@@ -209,6 +209,7 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
   const handleApproveStaff = async (staff: PendingStaff) => {
     setActionLoading(staff.id);
     try {
+      // Step 1: Approve profile
       await (supabase as any)
         .from('profiles')
         .update({
@@ -219,6 +220,47 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
         })
         .eq('id', staff.id);
 
+      // Step 2: Create staff record if not exists (THIS WAS THE MISSING STEP!)
+      const fullName = `${staff.first_name || ''} ${staff.last_name || ''}`.trim();
+      const { data: existingStaff } = await (supabase as any)
+        .from('staff')
+        .select('id')
+        .eq('institution_id', staff.institution_id)
+        .eq('email', staff.email)
+        .maybeSingle();
+
+      if (!existingStaff) {
+        // Generate employee ID
+        const empId = `EMP-${Date.now().toString().slice(-6)}`;
+        const designationMap: Record<string, string> = {
+          faculty: 'Teacher',
+          principal: 'Principal',
+          hod: 'Head of Department',
+          hr_manager: 'HR Manager',
+          accountant: 'Accountant',
+          librarian: 'Librarian',
+          hostel_warden: 'Hostel Warden',
+          transport_manager: 'Transport Manager',
+        };
+        await (supabase as any).from('staff').insert({
+          institution_id: staff.institution_id,
+          full_name: fullName,
+          email: staff.email,
+          phone: staff.phone || null,
+          employee_id: empId,
+          designation: designationMap[staff.role_name] || staff.role_name?.replace(/_/g, ' ') || 'Staff',
+          staff_type: ['faculty','hod','principal'].includes(staff.role_name) ? 'teaching' : 'non_teaching',
+          status: 'active',
+          joining_date: new Date().toISOString().split('T')[0],
+          user_id: staff.id,
+        });
+      } else {
+        // Update existing staff to active
+        await (supabase as any).from('staff').update({ status: 'active' })
+          .eq('id', existingStaff.id);
+      }
+
+      // Step 3: Log approval
       await (supabase as any).from('approval_logs').insert({
         action: 'approved',
         target_type: 'staff',
@@ -227,15 +269,26 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
         action_by: user?.id,
       });
 
+      // Step 4: Send notification to the staff
+      await (supabase as any).from('notifications').insert({
+        user_id: staff.id,
+        institution_id: staff.institution_id,
+        title: '✅ Your account has been approved!',
+        body: `Welcome to Skoolvyn! You can now login as ${staff.role_name?.replace(/_/g, ' ')}.`,
+        type: 'approval',
+        sent_at: new Date().toISOString(),
+      });
+
+      // Step 5: Send email
       supabase.functions.invoke('send-approval-email', {
         body: {
           type: 'staff_approved',
           recipient_email: staff.email,
-          recipient_name: `${staff.first_name || ''} ${staff.last_name || ''}`.trim(),
+          recipient_name: fullName,
         },
       }).catch(() => {});
 
-      toast({ title: 'Staff approved', description: `${staff.first_name} ${staff.last_name} is now active.` });
+      toast({ title: '✅ Staff approved!', description: `${fullName} can now login.` });
       fetchPending();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });

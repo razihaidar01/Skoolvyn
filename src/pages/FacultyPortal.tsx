@@ -79,7 +79,7 @@ export default function FacultyPortal() {
         staffId ? (supabase as any).from('timetable').select('*, subjects(name, code), batches(name)').eq('faculty_id', staffId).eq('is_active', true).order('day_of_week').order('period_no') : Promise.resolve({ data: [] }),
         staffId ? (supabase as any).from('assignments').select('*, subjects(name), batches(name)').eq('faculty_id', staffId).order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
         staffId ? (supabase as any).from('study_materials').select('*, subjects(name), batches(name)').eq('faculty_id', staffId).order('created_at', { ascending: false }) : Promise.resolve({ data: [] }),
-        staffId ? (supabase as any).from('leave_requests').select('*, leave_types(name)').eq('staff_id', staffId).order('created_at', { ascending: false }).limit(20) : Promise.resolve({ data: [] }),
+        staffId ? (supabase as any).from('leave_requests').select('*, leave_types(name)').eq('user_id', staffId).order('created_at', { ascending: false }).limit(20) : Promise.resolve({ data: [] }),
         instId ? (supabase as any).from('leave_types').select('*').eq('institution_id', instId) : Promise.resolve({ data: [] }),
         instId ? (supabase as any).from('subjects').select('id, name, code').eq('institution_id', instId).eq('is_active', true) : Promise.resolve({ data: [] }),
         instId ? (supabase as any).from('batches').select('id, name').eq('institution_id', instId).eq('is_active', true) : Promise.resolve({ data: [] }),
@@ -188,7 +188,7 @@ export default function FacultyPortal() {
     try {
       await (supabase as any).from('leave_requests').insert({
         institution_id: staff?.institution_id || user?.user_metadata?.institution_id,
-        staff_id: staff?.id,
+        user_id: staff?.id || user?.id,
         leave_type_id: leaveForm.leave_type_id || null,
         from_date: leaveForm.from_date,
         to_date: leaveForm.to_date,

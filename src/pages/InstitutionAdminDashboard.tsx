@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  LayoutDashboard, ShieldCheck, GraduationCap, Building, Building2, Users, UserCheck,
+  LayoutDashboard, FileText, ShieldCheck, GraduationCap, Building, Building2, Users, UserCheck,
   Calendar, ClipboardCheck, FileText, IndianRupee, BookOpen, Home, Bus,
   Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon, BarChart3, CalendarDays
 } from 'lucide-react';
@@ -37,6 +37,7 @@ import { TimetableModule } from '@/components/admin/timetable/TimetableModule';
 import { ReportsAnalytics } from '@/components/admin/reports/ReportsAnalytics';
 import { AcademicSetup } from '@/components/admin/academic/AcademicSetup';
 import { SettingsModule } from '@/components/admin/settings/SettingsModule';
+import { CertificatesModule } from '@/components/admin/certificates/CertificatesModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
 interface SidebarItem {
@@ -213,8 +214,9 @@ export default function InstitutionAdminDashboard() {
   const isTimetable = currentPath === '/admin/timetable';
   const isAcademic = currentPath === '/admin/academic' || currentPath === '/admin/departments';
   const isSettings = currentPath === '/admin/settings';
+  const isCertificates = currentPath === '/admin/certificates';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings && !isCertificates;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -356,6 +358,8 @@ export default function InstitutionAdminDashboard() {
             <AcademicSetup />
           ) : isSettings ? (
             <SettingsModule />
+          ) : isCertificates ? (
+            <CertificatesModule />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">
@@ -537,6 +541,7 @@ const ALL_SIDEBAR_ITEMS = [
   { title: 'Library', icon: BookOpen, path: '/admin/library', roles: ['institution_admin','librarian'] },
   { title: 'Hostel', icon: Home, path: '/admin/hostel', roles: ['institution_admin','hostel_warden'] },
   { title: 'Transport', icon: Bus, path: '/admin/transport', roles: ['institution_admin','transport_manager'] },
+  { title: 'Certificates', icon: FileText, path: '/admin/certificates', roles: ['institution_admin','principal','hod'] },
   { title: 'Announcements', icon: Bell, path: '/admin/announcements', roles: ['institution_admin','principal','hod'] },
   { title: 'Events', icon: CalendarDays, path: '/admin/events', roles: ['institution_admin','principal'] },
   { title: 'Reports', icon: BarChart3, path: '/admin/reports', roles: ['institution_admin','principal','hod'] },
