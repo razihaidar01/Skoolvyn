@@ -67,7 +67,7 @@ const App = () => (
             <Route path="/super-admin/settings" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
 
             {/* Institution Admin — Core */}
-            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles=['institution_admin', 'principal', 'hod', 'hr_manager', 'faculty', 'accountant', 'librarian', 'hostel_warden', 'transport_manager']><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'hr_manager', 'faculty', 'accountant', 'librarian', 'hostel_warden', 'transport_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/approvals" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/academic" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/departments" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
