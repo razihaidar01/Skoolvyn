@@ -67,13 +67,13 @@ const App = () => (
             <Route path="/super-admin/settings" element={<ProtectedRoute allowedRoles={['super_admin']}><SuperAdminDashboard /></ProtectedRoute>} />
 
             {/* Institution Admin — Core */}
-            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'hr_manager', 'accountant', 'librarian', 'hostel_warden', 'transport_manager']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles=['institution_admin', 'principal', 'hod', 'hr_manager', 'faculty', 'accountant', 'librarian', 'hostel_warden', 'transport_manager']><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/approvals" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/academic" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/departments" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal']}><InstitutionAdminDashboard /></ProtectedRoute>} />
 
             {/* Students */}
-            <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/students" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod', 'faculty']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/new" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/:id" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/students/:id/edit" element={<ProtectedRoute allowedRoles={['institution_admin', 'principal', 'hod']}><InstitutionAdminDashboard /></ProtectedRoute>} />
