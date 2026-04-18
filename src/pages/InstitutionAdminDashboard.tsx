@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  LayoutDashboard, ShieldCheck, GraduationCap, Building, Users, UserCheck,
+  LayoutDashboard, ShieldCheck, GraduationCap, Building, Building2, Users, UserCheck,
   Calendar, ClipboardCheck, FileText, IndianRupee, BookOpen, Home, Bus,
   Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon, BarChart3, CalendarDays
 } from 'lucide-react';
