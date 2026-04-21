@@ -254,12 +254,14 @@ export function ResultsReport() {
           <p className="text-sm text-muted-foreground">View consolidated results by batch and exam type</p>
         </div>
         {results.length > 0 && (
-          <Button variant="outline" size="sm" onClick={() => results.forEach(r => printMarksheet(r))}>
-            <Printer className="w-4 h-4 mr-1" /> Print All
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportCSV}>
-            <Download className="w-4 h-4 mr-1" /> Export CSV
-          </Button>
+          <>
+            <Button variant="outline" size="sm" onClick={() => results.forEach(r => printMarksheet(r))}>
+              <Printer className="w-4 h-4 mr-1" /> Print All
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportCSV}>
+              <Download className="w-4 h-4 mr-1" /> Export CSV
+            </Button>
+          </>
         )}
       </div>
 

@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  TrendingUp, LayoutDashboard, FileText, ShieldCheck, GraduationCap, Building, Building2, Users, UserCheck,
-  Calendar, ClipboardCheck, FileText, IndianRupee, BookOpen, Home, Bus,
-  Bell, Settings, LogOut, Menu, X, UserPlus, LucideIcon, BarChart3, CalendarDays
+  TrendingUp, LayoutDashboard, FileText, ShieldCheck, GraduationCap,
+  Building, Building2, Users, UserCheck, Calendar, ClipboardCheck,
+  IndianRupee, BookOpen, Home, Bus, Package, Bell, Settings, LogOut,
+  Menu, X, UserPlus, BarChart3, CalendarDays, LucideIcon
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { StudentsList } from '@/components/admin/students/StudentsList';
@@ -39,6 +40,9 @@ import { AcademicSetup } from '@/components/admin/academic/AcademicSetup';
 import { SettingsModule } from '@/components/admin/settings/SettingsModule';
 import { CertificatesModule } from '@/components/admin/certificates/CertificatesModule';
 import { AccountsModule } from '@/components/admin/accounts/AccountsModule';
+import { PayrollModule } from '@/components/admin/payroll/PayrollModule';
+import { AdmissionsModule } from '@/components/admin/admissions/AdmissionsModule';
+import { StaffAttendanceModule } from '@/components/admin/staff_attendance/StaffAttendanceModule';
 import { InventoryModule } from '@/components/admin/inventory/InventoryModule';
 import { formatDistanceToNow, format } from 'date-fns';
 
