@@ -151,6 +151,68 @@ export function ResultsReport() {
     setLoading(false);
   };
 
+  const printMarksheet = (student: any) => {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    const subRows = student.subjects.map((s: any) =>
+      `<tr>
+        <td style="padding:6px 8px;border:1px solid #ddd">${s.subjectName}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center">${s.maxMarks}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center">${s.passMarks || 35}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-weight:bold">${s.isAbsent ? 'AB' : (s.obtained ?? '—')}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center">${s.grade || '—'}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;color:${s.isPassed ? 'green' : 'red'}">${s.isAbsent ? 'AB' : s.isPassed ? 'P' : 'F'}</td>
+      </tr>`
+    ).join('');
+    w.document.write(`
+      <html><head><style>
+        body{font-family:Arial;margin:0;padding:20px;font-size:13px}
+        .header{text-align:center;border-bottom:2px solid #1a56db;padding-bottom:12px;margin-bottom:15px}
+        .school-name{font-size:20px;font-weight:bold;color:#1a56db}
+        .title{font-size:15px;font-weight:bold;margin:5px 0;text-transform:uppercase;text-decoration:underline}
+        table{width:100%;border-collapse:collapse;margin-top:10px}
+        th{background:#1a56db;color:white;padding:8px;border:1px solid #ddd;text-align:center}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:10px 0;background:#f9f9f9;padding:10px;border-radius:6px}
+        .info-row{font-size:12px}<span>.result-box{margin-top:15px;padding:12px;border:2px solid ${student.isPassed ? 'green' : 'red'};border-radius:8px;text-align:center;background:${student.isPassed ? '#f0fff4' : '#fff5f5'}}</span>
+        .footer{margin-top:30px;display:flex;justify-content:space-between;font-size:11px}
+        @media print{@page{margin:1cm}}
+      </style></head><body>
+        <div class="header">
+          <div class="school-name">School Name</div>
+          <div class="title">Report Card / Marksheet</div>
+        </div>
+        <div class="info-grid">
+          <div class="info-row"><b>Name:</b> ${student.full_name}</div>
+          <div class="info-row"><b>Roll No:</b> ${student.roll_no || '—'}</div>
+          <div class="info-row"><b>Rank:</b> ${student.rank} / ${results.length}</div>
+          <div class="info-row"><b>Percentage:</b> ${student.percentage}%</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Subject</th><th>Max Marks</th><th>Pass Marks</th><th>Obtained</th><th>Grade</th><th>Result</th>
+          </tr></thead>
+          <tbody>${subRows}</tbody>
+          <tfoot><tr>
+            <td colspan="3" style="padding:8px;border:1px solid #ddd;font-weight:bold">Total</td>
+            <td style="padding:8px;border:1px solid #ddd;text-align:center;font-weight:bold">${student.totalObtained}/${student.totalMax}</td>
+            <td style="padding:8px;border:1px solid #ddd;text-align:center;font-weight:bold">${student.overallGrade}</td>
+            <td style="padding:8px;border:1px solid #ddd;text-align:center;font-weight:bold;color:${student.isPassed ? 'green' : 'red'}">${student.isPassed ? 'PASS' : 'FAIL'}</td>
+          </tr></tfoot>
+        </table>
+        <div class="result-box">
+          <b style="font-size:16px;color:${student.isPassed ? 'green' : 'red'}">${student.isPassed ? '✅ PASSED' : '❌ FAILED'}</b>
+          <span style="margin-left:20px">Overall Grade: <b>${student.overallGrade}</b></span>
+          <span style="margin-left:20px">Percentage: <b>${student.percentage}%</b></span>
+        </div>
+        <div class="footer">
+          <div>Class Teacher: _______________</div>
+          <div>Date: ${new Date().toLocaleDateString('en-IN')}</div>
+          <div>Principal: _______________</div>
+        </div>
+      </body></html>`);
+    w.document.close(); w.print();
+  };
+
   const exportCSV = () => {
     const subjectHeaders = examsForBatch.map((e: any) => e.subjects?.name || '').join(',');
     const header = `Rank,Name,Roll No,${subjectHeaders},Total,Percentage,Grade,Result\n`;
@@ -192,6 +254,9 @@ export function ResultsReport() {
           <p className="text-sm text-muted-foreground">View consolidated results by batch and exam type</p>
         </div>
         {results.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() => results.forEach(r => printMarksheet(r))}>
+            <Printer className="w-4 h-4 mr-1" /> Print All
+          </Button>
           <Button variant="outline" size="sm" onClick={exportCSV}>
             <Download className="w-4 h-4 mr-1" /> Export CSV
           </Button>

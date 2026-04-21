@@ -39,6 +39,34 @@ export function CollectFee() {
   const [submitting, setSubmitting] = useState(false);
   const [receipt, setReceipt] = useState<any>(null);
 
+  const printReceipt = (r: any, instName: string) => {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`
+      <html><head><style>
+        body{font-family:Arial,sans-serif;max-width:400px;margin:40px auto;padding:20px}
+        .header{text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:15px}
+        .school{font-size:18px;font-weight:bold}
+        .title{font-size:14px;font-weight:bold;text-align:center;margin:10px 0;text-decoration:underline;text-transform:uppercase}
+        .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dotted #ccc;font-size:13px}
+        .total{font-size:16px;font-weight:bold;margin-top:10px;text-align:right;color:#1a56db}
+        .footer{margin-top:30px;text-align:center;font-size:11px;color:#666}
+        .sign{margin-top:40px;display:flex;justify-content:space-between}
+        @media print{@page{size:80mm auto;margin:5mm}}
+      </style></head><body>
+        <div class="header"><div class="school">\${instName || 'Institution'}</div><div style="font-size:11px">Fee Receipt</div></div>
+        <div class="title">Payment Receipt</div>
+        <div class="row"><span>Receipt No:</span><span style="font-weight:bold;font-family:monospace">\${r.receiptNo}</span></div>
+        <div class="row"><span>Date:</span><span>\${new Date(r.date).toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'})}</span></div>
+        <div class="row"><span>Student:</span><span>\${r.student}</span></div>
+        <div class="row"><span>Payment Mode:</span><span>\${r.mode}</span></div>
+        <div class="total">Amount Paid: ₹\${r.amount.toLocaleString('en-IN')}</div>
+        <div class="footer">Thank you! This is a computer generated receipt.</div>
+        <div class="sign"><span>Cashier Signature: ___________</span></div>
+      </body></html>`);
+    w.document.close(); w.print();
+  };
+
   const searchStudents = async () => {
     if (!institutionId || !search.trim()) return;
     setSearchLoading(true);

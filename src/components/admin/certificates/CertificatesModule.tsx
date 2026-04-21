@@ -18,6 +18,7 @@ const CERT_TYPES = [
   { id: 'bonafide', label: 'Bonafide Certificate', icon: ClipboardList, color: 'text-amber-600 bg-amber-50' },
   { id: 'id_card', label: 'ID Card', icon: IdCard, color: 'text-indigo-600 bg-indigo-50' },
   { id: 'admit_card', label: 'Admit Card', icon: GraduationCap, color: 'text-red-600 bg-red-50' },
+  { id: 'appreciation', label: 'Appreciation Certificate', icon: Star, color: 'text-yellow-600 bg-yellow-50' },
 ];
 
 export function CertificatesModule() {
@@ -233,6 +234,25 @@ export function CertificatesModule() {
         <div class="sign-block"><div style="margin-top:40px;border-top:1px solid #000;padding-top:5px;">Student Signature</div></div>
         <div class="sign-block"><div class="seal">EXAM<br>SEAL</div></div>
         <div class="sign-block"><div style="margin-top:40px;border-top:1px solid #000;padding-top:5px;">Principal / Controller of Exams</div></div>
+      </div></body></html>`;
+
+    if (type === 'appreciation') return base + `
+      <div class="cert-no">Cert No: APP-${Date.now().toString().slice(-6)} | Date: ${today}</div>
+      <div class="cert-title">Appreciation Certificate</div>
+      <div style="text-align:center;margin:20px 0">
+        <div style="font-size:48px">🌟</div>
+        <p style="font-size:18px;font-style:italic;color:#1a56db;margin:10px 0">This certificate is proudly presented to</p>
+        <p style="font-size:28px;font-weight:bold;border-bottom:2px solid #1a56db;display:inline-block;padding-bottom:5px">${s.full_name}</p>
+      </div>
+      <div class="body" style="text-align:center">
+        <p>In recognition of outstanding performance, dedication, and excellence demonstrated in academic and co-curricular activities.</p>
+        <p>We appreciate your hard work and commitment to excellence.</p>
+        <p style="font-style:italic;margin-top:15px">"Excellence is not a skill, it is an attitude."</p>
+      </div>
+      <div class="footer">
+        <div class="sign-block"><div style="margin-top:40px;border-top:1px solid #000;padding-top:5px;">Class Teacher</div></div>
+        <div class="sign-block"><div class="seal">SCHOOL<br>SEAL</div></div>
+        <div class="sign-block"><div style="margin-top:40px;border-top:1px solid #000;padding-top:5px;">Principal / Head</div></div>
       </div></body></html>`;
 
     return base + `<div class="cert-title">Certificate</div><div class="body"><p>Certificate for ${s.full_name}</p></div></body></html>`;
