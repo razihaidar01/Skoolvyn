@@ -71,45 +71,51 @@ async function fetchUserRoleAndProfile(userId: string) {
   let institutionId: string | null = null;
   let institutionApprovalStatus: string | null = null;
 
-  // Step 3: PRIORITY — get role from user_roles table (source of truth)
+  // Step 3: PRIORITY — get role from user_roles table (ONLY source of truth)
   // Fetch ALL roles for this user, pick super_admin first
+  let userRolesFetched = false;
   try {
-    const { data: userRoles } = await (supabase as any)
+    const { data: userRoles, error: urErr } = await (supabase as any)
       .from('user_roles')
       .select('role_id, institution_id, roles(name)')
       .eq('user_id', userId);
 
-    if (userRoles && userRoles.length > 0) {
-      // Check if user is super_admin first (highest priority)
+    if (!urErr && userRoles && userRoles.length > 0) {
+      userRolesFetched = true;
+      // Check if user is super_admin first (HIGHEST PRIORITY - never override)
       const superAdminRole = userRoles.find((r: any) => r.roles?.name === 'super_admin');
       if (superAdminRole) {
         roleName = 'super_admin';
-        institutionId = null; // super admin has no institution
+        institutionId = null; // super admin has NO institution
       } else {
-        // Take first non-super_admin role
-        const firstRole = userRoles[0];
-        roleName = firstRole.roles?.name || null;
-        institutionId = firstRole.institution_id || null;
+        // Take the role for the primary institution
+        const primaryRole = userRoles[0];
+        roleName = primaryRole.roles?.name || null;
+        institutionId = primaryRole.institution_id || null;
       }
     }
   } catch (_) { /* RLS may block — handled below */ }
 
-  // Step 4: If still no role, check metadata cache
+  // Step 4: If still no role, check metadata cache (fast path)
   if (!roleName && metadataRole) {
-    roleName = metadataRole;
-    institutionId = metadataInstitutionId;
+    // But NEVER trust metadata institution_admin without verification
+    // because someone might have registered with same email
+    if (metadataRole === 'super_admin') {
+      roleName = 'super_admin';
+      institutionId = null;
+    } else {
+      roleName = metadataRole;
+      institutionId = metadataInstitutionId;
+    }
   }
 
-  // Step 5: If still no role, check profile.institution_id
-  if (!roleName && profile?.institution_id) {
-    roleName = 'institution_admin';
-    institutionId = profile.institution_id;
-  }
-
-  // Step 6: For non-super-admin, get institution_id from profile if missing
+  // Step 5: For non-super-admin, get institution_id from profile if missing
   if (roleName && roleName !== 'super_admin' && !institutionId) {
     institutionId = profile?.institution_id || metadataInstitutionId || null;
   }
+  
+  // REMOVED: registered_by fallback - caused role confusion when same email
+  // registers multiple times. user_roles is the ONLY source of truth.
 
   // Step 7: Get institution approval status (only for institution_admin)
   if (roleName === 'institution_admin' && institutionId) {

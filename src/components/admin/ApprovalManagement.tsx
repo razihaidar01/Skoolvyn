@@ -90,7 +90,7 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
             const ur = (userRoles || []).find((u: any) => u.user_id === p.id);
             const roleName = ur ? roleMap[ur.role_id] : 'unknown';
             return { ...p, role_name: roleName };
-          }).filter((p: any) => p.role_name !== 'institution_admin' && p.role_name !== 'super_admin');
+          }).filter((p: any) => p.role_name !== 'super_admin' && p.role_name !== 'unknown');
 
           setPendingStaff(enriched);
         } else {
@@ -210,7 +210,7 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
     setActionLoading(staff.id);
     try {
       // Step 1: Approve profile
-      await (supabase as any)
+      const { error: profileError } = await (supabase as any)
         .from('profiles')
         .update({
           approval_status: 'approved',
@@ -219,8 +219,10 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
           approved_at: new Date().toISOString(),
         })
         .eq('id', staff.id);
+      
+      if (profileError) throw new Error(`Profile update failed: ${profileError.message}`);
 
-      // Step 2: Create staff record if not exists (THIS WAS THE MISSING STEP!)
+      // Step 2: Create staff record if not exists
       const fullName = `${staff.first_name || ''} ${staff.last_name || ''}`.trim();
       const { data: existingStaff } = await (supabase as any)
         .from('staff')
@@ -229,20 +231,15 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
         .eq('email', staff.email)
         .maybeSingle();
 
+      const designationMap: Record<string, string> = {
+        faculty: 'Teacher', principal: 'Principal', hod: 'Head of Department',
+        hr_manager: 'HR Manager', accountant: 'Accountant', librarian: 'Librarian',
+        hostel_warden: 'Hostel Warden', transport_manager: 'Transport Manager',
+      };
+
       if (!existingStaff) {
-        // Generate employee ID
         const empId = `EMP-${Date.now().toString().slice(-6)}`;
-        const designationMap: Record<string, string> = {
-          faculty: 'Teacher',
-          principal: 'Principal',
-          hod: 'Head of Department',
-          hr_manager: 'HR Manager',
-          accountant: 'Accountant',
-          librarian: 'Librarian',
-          hostel_warden: 'Hostel Warden',
-          transport_manager: 'Transport Manager',
-        };
-        await (supabase as any).from('staff').insert({
+        const { error: staffError } = await (supabase as any).from('staff').insert({
           institution_id: staff.institution_id,
           full_name: fullName,
           email: staff.email,
@@ -254,9 +251,9 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
           joining_date: new Date().toISOString().split('T')[0],
           user_id: staff.id,
         });
+        if (staffError) console.error('Staff record create error (non-fatal):', staffError.message);
       } else {
-        // Update existing staff to active
-        await (supabase as any).from('staff').update({ status: 'active' })
+        await (supabase as any).from('staff').update({ status: 'active', user_id: staff.id })
           .eq('id', existingStaff.id);
       }
 
