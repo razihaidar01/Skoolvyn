@@ -48,7 +48,7 @@ export function TimetableModule() {
   const [subjects, setSubjects] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [academicYears, setAcademicYears] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -78,24 +78,30 @@ export function TimetableModule() {
   }, [institutionId, selectedBatch, selectedYear]);
 
   const fetchMeta = async () => {
-    const [bRes, sRes, stRes, yRes] = await Promise.all([
-      (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId!).eq('is_active', true).order('name'),
-      (supabase as any).from('subjects').select('id, name, code').eq('institution_id', institutionId!).eq('is_active', true).order('name'),
-      (supabase as any).from('staff').select('id, full_name, designation').eq('institution_id', institutionId!).eq('status', 'active').order('full_name'),
-      (supabase as any).from('academic_years').select('id, name, is_current').eq('institution_id', institutionId!).order('start_date', { ascending: false }),
-    ]);
-    setBatches(bRes.data || []);
-    setSubjects(sRes.data || []);
-    setStaff(stRes.data || []);
-    setAcademicYears(yRes.data || []);
+    setLoading(true);
+    try {
+      const [bRes, sRes, stRes, yRes] = await Promise.all([
+        (supabase as any).from('batches').select('id, name, program_id').eq('institution_id', institutionId!).eq('is_active', true).order('name'),
+        (supabase as any).from('subjects').select('id, name, code').eq('institution_id', institutionId!).eq('is_active', true).order('name'),
+        (supabase as any).from('staff').select('id, full_name, designation').eq('institution_id', institutionId!).eq('status', 'active').order('full_name'),
+        (supabase as any).from('academic_years').select('id, name, is_current').eq('institution_id', institutionId!).order('start_date', { ascending: false }),
+      ]);
+      setBatches(bRes.data || []);
+      setSubjects(sRes.data || []);
+      setStaff(stRes.data || []);
+      setAcademicYears(yRes.data || []);
 
-    // Auto select current year
-    const currentYear = (yRes.data || []).find((y: any) => y.is_current);
-    if (currentYear) setSelectedYear(currentYear.id);
+      // Auto select current year
+      const currentYear = (yRes.data || []).find((y: any) => y.is_current);
+      if (currentYear) setSelectedYear(currentYear.id);
 
-    // Auto select first batch
-    if (bRes.data?.length) setSelectedBatch(bRes.data[0].id);
-    setLoading(false);
+      // Auto select first batch if available
+      if (bRes.data?.length) setSelectedBatch(bRes.data[0].id);
+    } catch (err) {
+      console.error('Timetable meta fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchTimetable = async () => {
@@ -292,7 +298,14 @@ export function TimetableModule() {
         <Card className="shadow-sm">
           <CardContent className="py-16 text-center">
             <Calendar className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="font-medium">Select a batch to view timetable</p>
+            {batches.length === 0 ? (
+              <>
+                <p className="font-medium text-foreground">No batches found</p>
+                <p className="text-sm text-muted-foreground mt-1">Create batches in Academic Setup first, then come back to manage timetable.</p>
+              </>
+            ) : (
+              <p className="font-medium">Select a batch to view timetable</p>
+            )}
           </CardContent>
         </Card>
       ) : loading ? (
