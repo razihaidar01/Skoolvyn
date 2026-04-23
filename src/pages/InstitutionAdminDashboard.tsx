@@ -10,7 +10,7 @@ import {
   TrendingUp, LayoutDashboard, FileText, ShieldCheck, GraduationCap,
   Building, Building2, Users, UserCheck, Calendar, ClipboardCheck,
   IndianRupee, BookOpen, Home, Bus, Package, Bell, Settings, LogOut,
-  Menu, X, UserPlus, BarChart3, CalendarDays, LucideIcon
+  Menu, X, UserPlus, BarChart3, MessageSquare, Users2, CalendarDays, LucideIcon
 } from 'lucide-react';
 import { ApprovalManagement } from '@/components/admin/ApprovalManagement';
 import { StudentsList } from '@/components/admin/students/StudentsList';
@@ -40,6 +40,8 @@ import { AcademicSetup } from '@/components/admin/academic/AcademicSetup';
 import { SettingsModule } from '@/components/admin/settings/SettingsModule';
 import { CertificatesModule } from '@/components/admin/certificates/CertificatesModule';
 import { AccountsModule } from '@/components/admin/accounts/AccountsModule';
+import { ComplaintsModule } from '@/components/admin/complaints/ComplaintsModule';
+import { VisitorsModule } from '@/components/admin/visitors/VisitorsModule';
 import { PayrollModule } from '@/components/admin/payroll/PayrollModule';
 import { AdmissionsModule } from '@/components/admin/admissions/AdmissionsModule';
 import { StaffAttendanceModule } from '@/components/admin/staff_attendance/StaffAttendanceModule';
@@ -226,8 +228,10 @@ export default function InstitutionAdminDashboard() {
   const isStaffAttendance = currentPath === '/admin/staff-attendance';
   const isAccounts = currentPath === '/admin/accounts';
   const isInventory = currentPath === '/admin/inventory';
+  const isComplaints = currentPath === '/admin/complaints';
+  const isVisitors = currentPath === '/admin/visitors';
 
-  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings && !isCertificates && !isPayroll && !isAdmissions && !isStaffAttendance && !isAccounts && !isInventory;
+  const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings && !isCertificates && !isPayroll && !isAdmissions && !isStaffAttendance && !isAccounts && !isInventory && !isComplaints && !isVisitors;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
 
   const statCards = [
@@ -381,6 +385,10 @@ export default function InstitutionAdminDashboard() {
             <AccountsModule />
           ) : isInventory ? (
             <InventoryModule />
+          ) : isComplaints ? (
+            <ComplaintsModule />
+          ) : isVisitors ? (
+            <VisitorsModule />
           ) : isComingSoon && !isDashboard ? (
             <div className="flex-1 flex items-center justify-center min-h-[60vh]">
               <Card className="max-w-md w-full">
@@ -567,6 +575,8 @@ const ALL_SIDEBAR_ITEMS = [
   { title: 'Payroll', icon: IndianRupee, path: '/admin/payroll', roles: ['institution_admin','hr_manager','accountant'] },
   { title: 'Accounts', icon: TrendingUp, path: '/admin/accounts', roles: ['institution_admin','accountant','principal'] },
   { title: 'Inventory', icon: Package, path: '/admin/inventory', roles: ['institution_admin','principal'] },
+  { title: 'Complaints', icon: MessageSquare, path: '/admin/complaints', roles: ['institution_admin','principal','hr_manager'] },
+  { title: 'Visitors', icon: Users2, path: '/admin/visitors', roles: ['institution_admin','principal'] },
   { title: 'Certificates', icon: FileText, path: '/admin/certificates', roles: ['institution_admin','principal','hod'] },
   { title: 'Announcements', icon: Bell, path: '/admin/announcements', roles: ['institution_admin','principal','hod'] },
   { title: 'Events', icon: CalendarDays, path: '/admin/events', roles: ['institution_admin','principal'] },
