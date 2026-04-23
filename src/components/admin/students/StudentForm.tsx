@@ -295,10 +295,18 @@ export function StudentForm() {
                   <Label>Date of Birth *</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn('w-full justify-start text-left font-normal', !form.date_of_birth && 'text-muted-foreground')}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.date_of_birth ? format(new Date(form.date_of_birth), 'dd/MM/yyyy') : 'Pick a date'}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Input
+                          type="date"
+                          value={form.date_of_birth}
+                          onChange={e => update('date_of_birth', e.target.value)}
+                          max={new Date().toISOString().split('T')[0]}
+                          className="flex-1"
+                        />
+                        <Button variant="outline" size="icon" className="flex-shrink-0">
+                          <CalendarIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar

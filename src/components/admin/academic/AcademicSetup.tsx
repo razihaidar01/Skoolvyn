@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,8 @@ const SUBJECT_TYPES = ['theory', 'practical', 'elective', 'lab', 'project'];
 
 export function AcademicSetup() {
   const { institutionId } = useAuth();
+  const location = useLocation();
+  const defaultTab = location.pathname === '/admin/departments' ? 'departments' : 'years';
   const { toast } = useToast();
 
   const [departments, setDepartments] = useState<any[]>([]);
@@ -309,7 +312,7 @@ export function AcademicSetup() {
         ))}
       </div>
 
-      <Tabs defaultValue="years">
+      <Tabs defaultValue={defaultTab}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="years">Academic Years ({academicYears.length})</TabsTrigger>
           <TabsTrigger value="departments">Departments ({departments.length})</TabsTrigger>

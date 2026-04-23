@@ -233,6 +233,9 @@ export default function InstitutionAdminDashboard() {
 
   const isComingSoon = comingSoonRoutes.includes(currentPath) && !isStudentRoute && !isStaffRoute && !isAttendanceRoute && !isExamsRoute && !isFeesRoute && !isLibrary && !isHostel && !isTransport && !isAnnouncements && !isEvents && !isTimetable && !isReports && !isAcademic && !isSettings && !isCertificates && !isPayroll && !isAdmissions && !isStaffAttendance && !isAccounts && !isInventory && !isComplaints && !isVisitors;
   const comingSoonItem = sidebarItems.find(i => i.path === currentPath);
+  const currentPageTitle = currentPath === '/admin/departments' ? 'Departments' : 
+                           currentPath === '/admin/academic' ? 'Academic Setup' :
+                           comingSoonItem?.title || 'Dashboard';
 
   const statCards = [
     { label: 'Total Students', value: stats?.totalStudents, icon: Users, color: 'text-primary' },
@@ -314,7 +317,7 @@ export default function InstitutionAdminDashboard() {
             <Menu className="w-6 h-6 text-foreground" />
           </button>
           <h1 className="text-lg font-semibold text-foreground hidden lg:block">
-            {comingSoonItem?.title || 'Dashboard'}
+            {currentPageTitle}
           </h1>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground hidden sm:inline">
