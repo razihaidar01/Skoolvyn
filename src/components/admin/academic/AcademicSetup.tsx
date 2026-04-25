@@ -68,7 +68,7 @@ export function AcademicSetup() {
       (supabase as any).from('batches').select('*').eq('institution_id', institutionId!).order('name'),
       (supabase as any).from('subjects').select('*').eq('institution_id', institutionId!).order('name'),
       (supabase as any).from('academic_years').select('*').eq('institution_id', institutionId!).order('start_date', { ascending: false }),
-      (supabase as any).from('staff').select('id, full_name, designation').eq('institution_id', institutionId!).eq('status', 'active'),
+      (supabase as any).from('staff').select('id, user_id, full_name, designation').eq('institution_id', institutionId!).eq('status', 'active').order('full_name'),
     ]);
     setDepartments(dRes.data || []);
     setPrograms(pRes.data || []);
@@ -112,12 +112,14 @@ export function AcademicSetup() {
   const saveDept = async () => {
     if (!deptForm.name.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
+    try {
     const payload = {
       institution_id: institutionId,
       name: deptForm.name.trim(),
       code: deptForm.code || null,
       description: deptForm.description || null,
-      hod_id: deptForm.hod_id || null,
+      hod_id: deptForm.hod_id ? 
+        (staff.find((s:any) => s.id === deptForm.hod_id)?.user_id || null) : null,
       is_active: true,
     };
     if (editId) await (supabase as any).from('departments').update(payload).eq('id', editId);
@@ -125,6 +127,9 @@ export function AcademicSetup() {
     toast({ title: editId ? 'Department updated!' : 'Department added!' });
     setDeptDialog(false);
     fetchAll();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Save failed', variant: 'destructive' });
+    }
     setSaving(false);
   };
 
@@ -138,6 +143,7 @@ export function AcademicSetup() {
   const saveProgram = async () => {
     if (!programForm.name.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
+    try {
     const payload = {
       institution_id: institutionId,
       name: programForm.name.trim(),
@@ -152,6 +158,9 @@ export function AcademicSetup() {
     toast({ title: editId ? 'Program updated!' : 'Program added!' });
     setProgramDialog(false);
     fetchAll();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Save failed', variant: 'destructive' });
+    }
     setSaving(false);
   };
 
@@ -173,6 +182,7 @@ export function AcademicSetup() {
       toast({ title: 'Name and Program required', variant: 'destructive' }); return;
     }
     setSaving(true);
+    try {
     const payload = {
       institution_id: institutionId,
       name: batchForm.name.trim(),
@@ -183,7 +193,8 @@ export function AcademicSetup() {
       max_students: batchForm.max_students ? parseInt(batchForm.max_students) : null,
       room_no: batchForm.room_no || null,
       academic_year_id: batchForm.academic_year_id || null,
-      class_teacher_id: batchForm.class_teacher_id || null,
+      class_teacher_id: batchForm.class_teacher_id ?
+        (staff.find((s:any) => s.id === batchForm.class_teacher_id)?.user_id || null) : null,
       is_active: true,
     };
     if (editId) await (supabase as any).from('batches').update(payload).eq('id', editId);
@@ -191,6 +202,9 @@ export function AcademicSetup() {
     toast({ title: editId ? 'Batch updated!' : 'Batch added!' });
     setBatchDialog(false);
     fetchAll();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Save failed', variant: 'destructive' });
+    }
     setSaving(false);
   };
 
@@ -209,6 +223,7 @@ export function AcademicSetup() {
   const saveSubject = async () => {
     if (!subjectForm.name.trim()) { toast({ title: 'Name required', variant: 'destructive' }); return; }
     setSaving(true);
+    try {
     const payload = {
       institution_id: institutionId,
       name: subjectForm.name.trim(),
@@ -226,6 +241,9 @@ export function AcademicSetup() {
     toast({ title: editId ? 'Subject updated!' : 'Subject added!' });
     setSubjectDialog(false);
     fetchAll();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Save failed', variant: 'destructive' });
+    }
     setSaving(false);
   };
 
