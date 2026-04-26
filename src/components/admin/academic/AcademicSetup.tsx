@@ -23,8 +23,6 @@ export function AcademicSetup() {
   const { institutionId } = useAuth();
   const location = useLocation();
   const defaultTab = location.pathname === '/admin/departments' ? 'departments' : 'years';
-  const location = useLocation();
-  const defaultTab = location.pathname === '/admin/departments' ? 'departments' : 'years';
   const { toast } = useToast();
 
   const [departments, setDepartments] = useState<any[]>([]);

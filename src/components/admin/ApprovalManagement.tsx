@@ -43,7 +43,7 @@ interface ApprovalManagementProps {
 }
 
 export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManagementProps) {
-  const { user } = useAuth();
+  const { user, institutionId } = useAuth();
   const { toast } = useToast();
   const [pendingInstitutions, setPendingInstitutions] = useState<PendingInstitution[]>([]);
   const [pendingStaff, setPendingStaff] = useState<PendingStaff[]>([]);

@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, TrendingUp, TrendingDown, Download, Loader2, IndianRupee } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const INCOME_CATS = ['Fee Collection', 'Donation', 'Grant', 'Transport Fee', 'Library Fine', 'Other Income'];
 const EXPENSE_CATS = ['Salary', 'Utilities', 'Maintenance', 'Stationery', 'Furniture', 'Equipment', 'Transport', 'Library', 'Events', 'Other Expense'];

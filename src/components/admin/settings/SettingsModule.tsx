@@ -108,7 +108,7 @@ export function SettingsModule() {
     if (pwForm.new_pw !== pwForm.confirm) { toast({ title: 'Passwords do not match', variant: 'destructive' }); return; }
     setSaving(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: pwForm.new_pw });
+      const { error } = await (supabase.auth as any).updateUser({ password: pwForm.new_pw });
       if (error) throw error;
       toast({ title: '✅ Password changed!' });
       setPwForm({ new_pw: '', confirm: '' });
