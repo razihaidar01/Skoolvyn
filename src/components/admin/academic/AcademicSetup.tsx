@@ -23,6 +23,8 @@ export function AcademicSetup() {
   const { institutionId } = useAuth();
   const location = useLocation();
   const defaultTab = location.pathname === '/admin/departments' ? 'departments' : 'years';
+  const location = useLocation();
+  const defaultTab = location.pathname === '/admin/departments' ? 'departments' : 'years';
   const { toast } = useToast();
 
   const [departments, setDepartments] = useState<any[]>([]);
@@ -259,6 +261,7 @@ export function AcademicSetup() {
       toast({ title: 'All fields required', variant: 'destructive' }); return;
     }
     setSaving(true);
+    try {
     if (yearForm.is_current) {
       await (supabase as any).from('academic_years').update({ is_current: false }).eq('institution_id', institutionId!);
     }
@@ -300,6 +303,18 @@ export function AcademicSetup() {
       <Button className="mt-4" size="sm" onClick={onAdd}><Plus className="w-4 h-4 mr-1" /> Add {label}</Button>
     </div>
   );
+
+  // Guard: wait for institutionId
+  if (!institutionId) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center space-y-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
