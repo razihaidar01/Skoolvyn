@@ -260,22 +260,26 @@ export function AcademicSetup() {
     }
     setSaving(true);
     try {
-    if (yearForm.is_current) {
-      await (supabase as any).from('academic_years').update({ is_current: false }).eq('institution_id', institutionId!);
+      if (yearForm.is_current) {
+        await (supabase as any).from('academic_years').update({ is_current: false }).eq('institution_id', institutionId!);
+      }
+      const payload = {
+        institution_id: institutionId,
+        name: yearForm.name.trim(),
+        start_date: yearForm.start_date,
+        end_date: yearForm.end_date,
+        is_current: yearForm.is_current,
+      };
+      if (editId) await (supabase as any).from('academic_years').update(payload).eq('id', editId);
+      else await (supabase as any).from('academic_years').insert(payload);
+      toast({ title: editId ? 'Year updated!' : 'Year added!' });
+      setYearDialog(false);
+      fetchAll();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to save', variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
-    const payload = {
-      institution_id: institutionId,
-      name: yearForm.name.trim(),
-      start_date: yearForm.start_date,
-      end_date: yearForm.end_date,
-      is_current: yearForm.is_current,
-    };
-    if (editId) await (supabase as any).from('academic_years').update(payload).eq('id', editId);
-    else await (supabase as any).from('academic_years').insert(payload);
-    toast({ title: editId ? 'Year updated!' : 'Year added!' });
-    setYearDialog(false);
-    fetchAll();
-    setSaving(false);
   };
 
   // ── UI HELPERS ────────────────────────────────────────────
