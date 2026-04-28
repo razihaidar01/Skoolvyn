@@ -260,26 +260,22 @@ export function AcademicSetup() {
     }
     setSaving(true);
     try {
-      if (yearForm.is_current) {
-        await (supabase as any).from('academic_years').update({ is_current: false }).eq('institution_id', institutionId!);
-      }
-      const payload = {
-        institution_id: institutionId,
-        name: yearForm.name.trim(),
-        start_date: yearForm.start_date,
-        end_date: yearForm.end_date,
-        is_current: yearForm.is_current,
-      };
-      if (editId) await (supabase as any).from('academic_years').update(payload).eq('id', editId);
-      else await (supabase as any).from('academic_years').insert(payload);
-      toast({ title: editId ? 'Year updated!' : 'Year added!' });
-      setYearDialog(false);
-      fetchAll();
-    } catch (err: any) {
-      toast({ title: 'Error', description: err?.message || 'Failed to save', variant: 'destructive' });
-    } finally {
-      setSaving(false);
+    if (yearForm.is_current) {
+      await (supabase as any).from('academic_years').update({ is_current: false }).eq('institution_id', institutionId!);
     }
+    const payload = {
+      institution_id: institutionId,
+      name: yearForm.name.trim(),
+      start_date: yearForm.start_date,
+      end_date: yearForm.end_date,
+      is_current: yearForm.is_current,
+    };
+    if (editId) await (supabase as any).from('academic_years').update(payload).eq('id', editId);
+    else await (supabase as any).from('academic_years').insert(payload);
+    toast({ title: editId ? 'Year updated!' : 'Year added!' });
+    setYearDialog(false);
+    fetchAll();
+    setSaving(false);
   };
 
   // ── UI HELPERS ────────────────────────────────────────────
@@ -306,9 +302,18 @@ export function AcademicSetup() {
     </div>
   );
 
-  // Guard: wait for institutionId
+  // Wait for institutionId
   if (!institutionId) {
     return (
+      <div className="space-y-4 animate-pulse p-4">
+        <div className="h-8 bg-muted rounded w-1/3"></div>
+        <div className="h-32 bg-muted rounded"></div>
+        <div className="h-64 bg-muted rounded"></div>
+      </div>
+    );
+  }
+
+  return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center space-y-3">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>

@@ -91,7 +91,7 @@ function formatINR(amount: number): string {
 }
 
 export default function InstitutionAdminDashboard() {
-  const { profile, institutionId, role, signOut } = useAuth();
+  const { profile, institutionId, role, loading: authLoading, signOut } = useAuth();
   const sidebarItems = getSidebarItems(role);
   const navigate = useNavigate();
   const location = useLocation();
@@ -254,6 +254,19 @@ export default function InstitutionAdminDashboard() {
     { label: 'Post Announcement', icon: Bell, path: '/admin/announcements', color: 'text-indigo-600 bg-indigo-50' },
     { label: 'Add Exam', icon: FileText, path: '/admin/examinations', color: 'text-destructive bg-red-50' },
   ];
+
+  // CRITICAL: Wait for institutionId before rendering anything
+  if (authLoading || (!institutionId && role !== 'super_admin')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen flex bg-background">
