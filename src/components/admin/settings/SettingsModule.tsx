@@ -282,4 +282,4 @@ export function SettingsModule() {
       </Tabs>
     </div>
   );
-}
+}}

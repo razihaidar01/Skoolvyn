@@ -270,4 +270,4 @@ export function PayrollModule() {
       </Dialog>
     </div>
   );
-}
+}}

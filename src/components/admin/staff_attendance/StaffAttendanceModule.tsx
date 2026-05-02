@@ -232,4 +232,4 @@ export function StaffAttendanceModule() {
       )}
     </div>
   );
-}
+}}

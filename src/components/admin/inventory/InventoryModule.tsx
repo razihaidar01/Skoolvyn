@@ -158,4 +158,4 @@ export function InventoryModule() {
       </Dialog>
     </div>
   );
-}
+}}

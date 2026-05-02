@@ -198,4 +198,4 @@ export function ComplaintsModule() {
       </Dialog>
     </div>
   );
-}
+}}
