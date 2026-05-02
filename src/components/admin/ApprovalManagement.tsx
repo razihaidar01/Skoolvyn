@@ -557,3 +557,4 @@ export function ApprovalManagement({ mode, onPendingCountChange }: ApprovalManag
       </div>
     );
 }
+}
