@@ -405,4 +405,3 @@ export function EventsModule() {
       </Dialog>
     </div>
   );
-}

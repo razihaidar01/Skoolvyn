@@ -428,4 +428,3 @@ export function HostelModule() {
       </Dialog>
     </div>
   );
-}

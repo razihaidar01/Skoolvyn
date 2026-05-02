@@ -516,4 +516,3 @@ export function TimetableModule() {
       </Dialog>
     </div>
   );
-}
