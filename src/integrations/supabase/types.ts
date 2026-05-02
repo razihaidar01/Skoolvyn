@@ -52,6 +52,56 @@ export type Database = {
           },
         ]
       }
+      accounts: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          institution_id: string
+          payment_mode: string | null
+          reference_no: string | null
+          transaction_date: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          institution_id: string
+          payment_mode?: string | null
+          reference_no?: string | null
+          transaction_date?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          institution_id?: string
+          payment_mode?: string | null
+          reference_no?: string | null
+          transaction_date?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admissions: {
         Row: {
           academic_year_id: string | null
@@ -457,6 +507,45 @@ export type Database = {
           },
         ]
       }
+      audit_trail: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          institution_id: string | null
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          institution_id?: string | null
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          institution_id?: string | null
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       batch_subjects: {
         Row: {
           batch_id: string
@@ -586,6 +675,110 @@ export type Database = {
             columns: ["program_id"]
             isOneToOne: false
             referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificate_logs: {
+        Row: {
+          certificate_no: string | null
+          certificate_type: string
+          created_at: string | null
+          id: string
+          institution_id: string
+          issued_by: string | null
+          issued_date: string | null
+          remarks: string | null
+          student_id: string | null
+        }
+        Insert: {
+          certificate_no?: string | null
+          certificate_type: string
+          created_at?: string | null
+          id?: string
+          institution_id: string
+          issued_by?: string | null
+          issued_date?: string | null
+          remarks?: string | null
+          student_id?: string | null
+        }
+        Update: {
+          certificate_no?: string | null
+          certificate_type?: string
+          created_at?: string | null
+          id?: string
+          institution_id?: string
+          issued_by?: string | null
+          issued_date?: string | null
+          remarks?: string | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_logs_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_logs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          institution_id: string
+          priority: string | null
+          resolution: string | null
+          status: string | null
+          subject: string
+          submitted_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_id: string
+          priority?: string | null
+          resolution?: string | null
+          status?: string | null
+          subject: string
+          submitted_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          institution_id?: string
+          priority?: string | null
+          resolution?: string | null
+          status?: string | null
+          subject?: string
+          submitted_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
@@ -1299,6 +1492,65 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      inventory: {
+        Row: {
+          category: string | null
+          condition: string | null
+          created_at: string | null
+          id: string
+          institution_id: string
+          item_name: string
+          location: string | null
+          notes: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          quantity: number | null
+          unit: string | null
+          updated_at: string | null
+          vendor: string | null
+        }
+        Insert: {
+          category?: string | null
+          condition?: string | null
+          created_at?: string | null
+          id?: string
+          institution_id: string
+          item_name: string
+          location?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number | null
+          unit?: string | null
+          updated_at?: string | null
+          vendor?: string | null
+        }
+        Update: {
+          category?: string | null
+          condition?: string | null
+          created_at?: string | null
+          id?: string
+          institution_id?: string
+          item_name?: string
+          location?: string | null
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number | null
+          unit?: string | null
+          updated_at?: string | null
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leave_requests: {
         Row: {
@@ -2078,6 +2330,36 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          action: string
+          blocked_until: string | null
+          count: number | null
+          created_at: string | null
+          id: string
+          identifier: string
+          window_start: string | null
+        }
+        Insert: {
+          action: string
+          blocked_until?: string | null
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier: string
+          window_start?: string | null
+        }
+        Update: {
+          action?: string
+          blocked_until?: string | null
+          count?: number | null
+          created_at?: string | null
+          id?: string
+          identifier?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           created_at: string | null
@@ -2096,6 +2378,42 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      security_events: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          institution_id: string | null
+          ip_address: string | null
+          severity: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          institution_id?: string | null
+          ip_address?: string | null
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          institution_id?: string | null
+          ip_address?: string | null
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -2280,6 +2598,57 @@ export type Database = {
           },
         ]
       }
+      staff_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          institution_id: string
+          staff_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          institution_id: string
+          staff_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          institution_id?: string
+          staff_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_documents_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_documents_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_attendance: {
         Row: {
           batch_id: string
@@ -2422,6 +2791,7 @@ export type Database = {
       student_fees: {
         Row: {
           academic_year_id: string | null
+          amount_paid: number | null
           balance_amount: number | null
           created_at: string | null
           discount_amount: number | null
@@ -2439,6 +2809,7 @@ export type Database = {
         }
         Insert: {
           academic_year_id?: string | null
+          amount_paid?: number | null
           balance_amount?: number | null
           created_at?: string | null
           discount_amount?: number | null
@@ -2456,6 +2827,7 @@ export type Database = {
         }
         Update: {
           academic_year_id?: string | null
+          amount_paid?: number | null
           balance_amount?: number | null
           created_at?: string | null
           discount_amount?: number | null
@@ -3183,11 +3555,71 @@ export type Database = {
           },
         ]
       }
+      visitors: {
+        Row: {
+          check_in: string | null
+          check_out: string | null
+          created_at: string | null
+          department: string | null
+          id: string
+          id_proof_no: string | null
+          id_proof_type: string | null
+          institution_id: string
+          person_to_meet: string | null
+          phone: string | null
+          purpose: string | null
+          remarks: string | null
+          visitor_name: string
+        }
+        Insert: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          id_proof_no?: string | null
+          id_proof_type?: string | null
+          institution_id: string
+          person_to_meet?: string | null
+          phone?: string | null
+          purpose?: string | null
+          remarks?: string | null
+          visitor_name: string
+        }
+        Update: {
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          id_proof_no?: string | null
+          id_proof_type?: string | null
+          institution_id?: string
+          person_to_meet?: string | null
+          phone?: string | null
+          purpose?: string | null
+          remarks?: string | null
+          visitor_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitors_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_suspicious_activity: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       get_my_institution_id: { Args: never; Returns: string }
       get_my_role: { Args: never; Returns: string }
       has_role_any: { Args: { _roles: string[] }; Returns: boolean }
