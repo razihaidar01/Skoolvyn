@@ -230,3 +230,4 @@ export function AccountsModule() {
       </Dialog>
     </div>
   );
+}

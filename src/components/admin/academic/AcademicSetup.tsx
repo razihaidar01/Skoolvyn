@@ -750,3 +750,4 @@ export function AcademicSetup() {
       </Dialog>
     </div>
   );
+}
