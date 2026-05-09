@@ -266,7 +266,6 @@ export function StaffForm() {
         bank_account_no: form.account_number || null,
         ifsc_code: form.ifsc_code || null,
         status: form.status || 'active',
-        status: form.status || 'active',
         updated_at: new Date().toISOString(),
       };
 
