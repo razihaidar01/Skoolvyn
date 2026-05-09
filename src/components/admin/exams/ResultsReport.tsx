@@ -12,7 +12,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table';
-import { ChevronLeft, Download, Trophy, TrendingUp } from 'lucide-react';
+import { ChevronLeft, Download, Trophy, TrendingUp, Printer } from 'lucide-react';
 
 interface StudentResult {
   studentId: string;
