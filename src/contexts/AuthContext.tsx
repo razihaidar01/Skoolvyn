@@ -190,8 +190,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithEmail = async (email: string, password: string) => {
+    // Client-side rate limiting: 5 attempts per 15 minutes per email
+    const rlKey = `login_${email.toLowerCase()}`;
+    const stored = sessionStorage.getItem(rlKey);
+    const WINDOW_MS = 15 * 60 * 1000;
+    if (stored) {
+      try {
+        const { count, ts } = JSON.parse(stored);
+        if (Date.now() - ts < WINDOW_MS && count >= 5) {
+          return { error: 'Too many login attempts. Try again in 15 minutes.', redirectPath: null };
+        }
+      } catch { /* ignore parse errors */ }
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message, redirectPath: null };
+    if (error) {
+      // Track failed attempt
+      try {
+        const curr = stored ? JSON.parse(stored) : { count: 0, ts: Date.now() };
+        if (Date.now() - curr.ts > WINDOW_MS) {
+          sessionStorage.setItem(rlKey, JSON.stringify({ count: 1, ts: Date.now() }));
+        } else {
+          sessionStorage.setItem(rlKey, JSON.stringify({ count: curr.count + 1, ts: curr.ts }));
+        }
+      } catch { /* storage blocked */ }
+      return { error: error.message, redirectPath: null };
+    }
+
+    // Reset rate limit on success
+    try { sessionStorage.removeItem(rlKey); } catch {}
 
     const result = await fetchUserRoleAndProfile(data.user.id);
 
@@ -266,7 +293,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try { await supabase.auth.signOut(); } catch { /* ignore */ }
+    try {
+      // Preserve crash logs across sign out for support diagnostics
+      const crashLogs = localStorage.getItem('skoolvyn_crash_logs');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (crashLogs) localStorage.setItem('skoolvyn_crash_logs', crashLogs);
+    } catch { /* storage blocked */ }
     setProfile(null);
     setRole(null);
     setInstitutionId(null);
