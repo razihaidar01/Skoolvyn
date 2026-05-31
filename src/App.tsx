@@ -49,6 +49,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Public landing pages */}
             <Route path="/" element={<HomePage />} />
