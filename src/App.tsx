@@ -1,35 +1,45 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import OtpLoginPage from "./pages/auth/OtpLoginPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import DashboardPage from "./pages/DashboardPage";
-import StudentPortal from "./pages/StudentPortal";
-import ParentPortal from "./pages/ParentPortal";
-import FacultyPortal from "./pages/FacultyPortal";
-import SuperAdminDashboard from "./pages/SuperAdminDashboard";
-import InstitutionAdminDashboard from "./pages/InstitutionAdminDashboard";
-import PendingApprovalPage from "./pages/PendingApprovalPage";
-import AccountRejectedPage from "./pages/AccountRejectedPage";
-import AccountSuspendedPage from "./pages/AccountSuspendedPage";
-import UnauthorizedPage from "./pages/UnauthorizedPage";
-import NotFound from "./pages/NotFound";
-import HomePage from "./pages/landing/HomePage";
-import FeaturesPage from "./pages/landing/FeaturesPage";
-import PricingPage from "./pages/landing/PricingPage";
-import FaqPage from "./pages/landing/FaqPage";
-import AboutPage from "./pages/landing/AboutPage";
-import ContactPage from "./pages/landing/ContactPage";
+
+// Code-split route components so the initial bundle stays small.
+const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const OtpLoginPage = lazy(() => import("./pages/auth/OtpLoginPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/auth/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/auth/ResetPasswordPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const StudentPortal = lazy(() => import("./pages/StudentPortal"));
+const ParentPortal = lazy(() => import("./pages/ParentPortal"));
+const FacultyPortal = lazy(() => import("./pages/FacultyPortal"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const InstitutionAdminDashboard = lazy(() => import("./pages/InstitutionAdminDashboard"));
+const PendingApprovalPage = lazy(() => import("./pages/PendingApprovalPage"));
+const AccountRejectedPage = lazy(() => import("./pages/AccountRejectedPage"));
+const AccountSuspendedPage = lazy(() => import("./pages/AccountSuspendedPage"));
+const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const HomePage = lazy(() => import("./pages/landing/HomePage"));
+const FeaturesPage = lazy(() => import("./pages/landing/FeaturesPage"));
+const PricingPage = lazy(() => import("./pages/landing/PricingPage"));
+const FaqPage = lazy(() => import("./pages/landing/FaqPage"));
+const AboutPage = lazy(() => import("./pages/landing/AboutPage"));
+const ContactPage = lazy(() => import("./pages/landing/ContactPage"));
 
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+  </div>
+);
 
 const App = () => (
   <ErrorBoundary>
